@@ -1,6 +1,6 @@
 # P0.5「把 M=1 稠密 fp16 GEMM 从 Tensile 串行 K 循环里换出来」实施计划
 
-> **状态（2026-09-08）：Task 0–7 全部执行完毕，G1–G8 全过。** step 53.663 → 33.008 ms（18.6 → 30.3 tok/s），256/256 贪心 token 一致，已进交付镜像。结论与偏差见 [`2026-09-08-gfx906-p05-report.md`](2026-09-08-gfx906-p05-report.md)，逐步证据见文末「执行记录」。下方逐步 checkbox 保留原样，以执行记录为准。
+> **状态（2026-09-08）：Task 0–7 全部执行完毕，G1–G8 全过。** step 53.663 → 33.008 ms（18.6 → 30.3 tok/s），256/256 贪心 token 一致，已进交付镜像。结论与偏差见 [`2026-09-08-gfx906-p05-report.md`](2026-09-08-gfx906-p05-report.md)，逐步证据见文末「执行记录」。checkbox 已全部勾选；「Commit」步骤已用行内身份（`git -c`，未写 git config）提交并推送到私有仓库的 `p0-attribution` 分支。
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -838,14 +838,14 @@ git commit -m "docs(p05): close out the dense M=1 GEMV swap, update #20 P1 input
 
 ## 执行记录（执行时填）
 
-> 勾选表示步骤已执行；各任务的「Commit」步骤按 Task 0 Step 1 的约定降级为 `git add` 暂存 ⇒ **勾上＝已暂存，尚未提交**（等 `user.name`/`user.email`）。
+> 勾选表示步骤已执行。执行期间仓库无 git 身份，各任务的「Commit」步骤先降级为 `git add` 暂存；收口时（Task 7 Step 5）用行内 `git -c user.name=… -c user.email=…` 提交，**全程没有写过 `git config`**。
 
-### Task 0（前置门与 harness 参数化）— 完成，待提交
+### Task 0（前置门与 harness 参数化）— 完成
 
 - `p0_step.py`：`OUT` / `EXPECTED_MS` 参数化、`req_times` 取最小并保留 `out`、落盘 `p0_step_out.json`（token_ids + text）。容器内 `python3 -m py_compile` 通过（`COMPILE-OK`），md5 `a39cd0df0b72af146889897d5d786002`。
 - `p05_install.sh`：md5 `f2627222de3277b405f19e5c6d194776`，`bash -n` 通过。
 - **计划自带缺陷 #1（已修）**：交付守卫用 `sed 's/[.[\*^$]/\\&/g'` 做 ERE 转义 —— sed 替换侧的 `&` 展开成整个匹配，于是 `.` 变成了 `&`，结果**连在 Dockerfile 里的 `container_src/wna16_exllama.py` 也被判 reject**（假阴性 = 守卫全盲，任何安装都会被 FORCE 绕过）。改为固定串匹配 `grep -qF -e "$DST" -e "dist-packages/${REL}" -e '${SP}/'"${REL}"`。三例复测：在配方里的 ⇒ pass；不在的 ⇒ reject + exit 1；`FORCE=1` ⇒ 打印 FATAL 后放行。
-- **提交降级**：仓库 0 提交且 `git config` 无 `user.name`/`user.email`（长期约束：不许改 git config）⇒ 各任务「Commit」步骤改为 `git add` 暂存，等身份。不阻塞测量。
+- **提交降级**：仓库 0 提交且 `git config` 无 `user.name`/`user.email`（长期约束：不许改 git config）⇒ 各任务「Commit」步骤改为 `git add` 暂存，等身份。不阻塞测量。（执行期如此；收口时已提交并推送，见 Task 7 Step 5。）
 
 ### Task 1（裸测）— G1 PASS、G2 PASS
 
@@ -930,17 +930,22 @@ git commit -m "docs(p05): close out the dense M=1 GEMV swap, update #20 P1 input
 开箱自检（真机双卡，`docker run --rm --device /dev/kfd --device /dev/dri … vllm-gfx906:latest gfx906-selfcheck`）：**SELFCHECK PASSED**，20 条 `[ok]`、`grep -c FAIL` = 0，含新增的 `[ok] gfx906 M=1 dense GEMV on skinny LLGemm1`，且 GPU 分支的 `fp32 mv correct`/`fp16 matmul finite`/`W4A16 graph-capture op exposed` 全过（`p0/p05_selfcheck.log`）。
 加测（交付镜像内跑门测试，证明不是「字符串在但路径不通」）：`docker run --rm --device … vllm-gfx906:latest python3 /work/p0/p05_gate_test.py` ⇒ **ALL PASS 10/10**。
 **Step 7**：镜像 ENV 只有 `HSA_OVERRIDE_GFX_VERSION/VLLM_TRITON_ATTN_NUM_SEGMENTS/VLLM_WNA16_EXLLAMA/PYTORCH_ROCM_ARCH/VLLM_TARGET_DEVICE`，`SKINNY=[unset]` ⇒ 取代码默认 True ⇒ 交付默认即 33.0 ms/step 臂，`serve.sh` 无需改动。✅ G8。
-Step 8 的 `git add` 见下（无 git 身份 ⇒ 暂存不提交）。
+Step 8 执行期只做到 `git add` 暂存（当时仍无 git 身份）⇒ 提交与推送见 Task 7 Step 5。
 
-### Task 7（收口、文档与 #20 输入）— 完成，提交降级为暂存
+### Task 7（收口、文档与 #20 输入）— 完成（已提交并推送）
 
-**Step 1 环境恢复**：`p0_clock.sh unlock` ⇒ 两卡 `auto`（待机 sclk 860 / mclk 350），`torch.cuda.mem_get_info` 空闲 **17.1 GB / 17.1 GB**，`rocm-smi` util 0%，`blackbox.sh` 采样器已停（用 `pkill -f "blac[k]box.sh"`，见缺陷 #10）。
+**Step 1 环境恢复**：`p0_clock.sh unlock` ⇒ 两卡 `auto`（待机 sclk 860 / mclk 350），`torch.cuda.mem_get_info` 空闲 **17.1 GB / 17.1 GB**，`rocm-smi` util 0%，`blackbox.sh` 采样器已停 —— 停止时首次用 `pkill -f "bash /home/x/blackbox.sh"` 把发起它的 ssh shell 自己也杀了（模式出现在自己的命令行里）⇒ exit 255 且解锁静默没跑；改 `pkill -f "blac[k]box.sh"` 后正常。已记入 `gfx906-env-pitfalls` 第 10 条。
 **Step 2 报告**：`docs/superpowers/plans/2026-09-08-gfx906-p05-report.md`（结论先行：18.6 → 30.3 tok/s）。含门谓词一行 diff、为何不放宽 `_ON_GFX9`、G1..G8 全表、两臂 `per_step_ms`/tok·s⁻¹/rc、五桶对照 + 1.6% 对账残差、真实权重 rel 与 `argmax_flips=0/256`、greedy token 零分叉、两条构建路径与 `SELFCHECK PASSED 20/0`、5 条已知偏差、后续（`M=2..5` 的 `wvSplitK` 从未在 gfx906 跑过、`in_proj_ba` 是 12 block / 60 CU 的占用不足、1700 MHz 交付态复测）、复现命令。
 **Step 3 #20 输入**：P0 报告（`2026-09-04-gfx906-w4a16-p0-report.md`）末尾追加「P0.5 已完成 ⇒ 本报告的预测表已被实测替换」，归因文档（`...-p0-attribution.md`）执行记录标 P0.5 完成。#20 的头部空间收敛为 **W4A16 GEMV 19 867 µs/step 对 6 788 µs 地板（33% 效率）＝全 step 的 60.2%**。
 **Step 4 记忆**：`gfx906-env-pitfalls` 追加第 9、10 条（`_ON_GFX9` 有意排除 gfx906 ⇒ skinny 快路径默认不可达，先查 arch 谓词别怀疑内核没编；`pkill -f` 的自匹配与「会话级 ssh 管道当日志」两处死角）；`final-goal-shippable-image` 记 P0.5 已进镜像 + 前后 tok/s + Path A base 规则 + `prepare_build_context.sh` 的 entrypoint 流向。
-**Step 5 提交**：**降级为暂存** —— 仓库 0 提交、`git config` 无 `user.name`/`user.email`（长期约束：永不改 git config）。`git add` 后 `git diff --cached --stat` = **159 files changed, 28726 insertions**，`git status` 无残留 `MM`；暂存区密钥扫描（api_key/passwd/private key/ghp_/AKIA）仅命中 `p0_preflight.sh` 的提示字符串 `(sudo: needs password)`，无泄漏。剩余 11 个未跟踪文件是历史遗留的 `*.md` 草稿与 `.gitattributes`，不属于本任务。
+**Step 5 提交**：执行期先按约定降级为暂存（仓库 0 提交、`git config` 无身份，长期约束：永不改 git config）⇒ 暂存 **159 个文件**，`git status --short` 无残留 `MM`；剩余 11 个未跟踪文件是历史遗留的 `*.md` 草稿与 `.gitattributes`，不属于本任务。收口时经用户确认改为**直接提交并推送到 GitHub**：
+- 推送前扫描 ⇒ 暂存区文件名（`*.pem/*.key/id_*/.env/secret/token/…`）零命中；内容扫描（api_key/passwd/private key/ghp_/AKIA）仅命中 `p0_preflight.sh` 的提示字符串 `(sudo: needs password)`，无凭证泄漏；待推内容合计 **1.1 MB**、最大单文件 1.2 MB ⇒ 不需要 LFS（镜像与 `build-context/` 都在宿主上，不在仓库里）。
+- **传输层结论（本机网络的可复用事实）**：`git ls-remote https://github.com/...` ⇒ `Recv failure: Connection was reset`，而 `api.github.com` 正常 200、`ssh -T git@github.com` 与 `ssh.github.com:443` 都能握到 GitHub ⇒ **只有 SSH 能推**，PAT/HTTPS 路线在这台机器上不通。
+- **仓库可见性**：`git ls-remote` 走 SSH 能读 + 未认证 `api.github.com/repos/...` 返回 404 ⇒ **私有**，故宿主路径 / `x@192.168.10.11` 这类内部信息不会公开可见。
+- **身份**：用户未给 name/email ⇒ 用 GitHub 登录名 + noreply 邮箱，且以行内方式传入（`git -c user.name=362132718 -c user.email=362132718@users.noreply.github.com commit`），**未写过 git config**。
+- 结果：初始快照提交 `3009064`（159 files）+ 本次收口提交，已 `git push -u origin p0-attribution`；空仓库被首推的分支即成为默认分支（`git ls-remote --symref origin HEAD` ⇒ `ref: refs/heads/p0-attribution`）。
 
 **仍未闭合的验证缺口**（下次接手先看这三条）：
 1. **serve 路径在交付时钟（1700/auto）下未复测** —— QUICKSTART 里的 ~36 tok/s 是按 sclk 比例外推，文档中已明确标注「外推值」。
 2. **交付镜像冷启动未走一遍** —— 新 `layers/utils.py` 会使 vLLM 源码哈希键的 AOT 缓存失效（一次性 +387 s），只测量过开发容器内的等价路径。
-3. **提交与分发（#18）** 仍未落地，镜像 `1e18c8ea6b8b` 目前只存在于宿主本地。
+3. **镜像分发（#18）** 仍未落地 —— 代码与文档已进 GitHub 私有仓库（`3009064` + 收口提交），但交付物本体 `vllm-gfx906:latest`（`1e18c8ea6b8b`）只存在于宿主本地，既没 `docker push` 也没导出 tar。
