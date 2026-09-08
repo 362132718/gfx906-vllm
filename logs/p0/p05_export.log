@@ -1,0 +1,29 @@
+=== EXPORT START 2026-09-08T11:50:32+08:00 image=vllm-gfx906:latest id=6ec669c822e8 boot_since=2026-09-08 00:06:18
+/dev/nvme0n1p2  915G  524G  345G   61% /
+inspect_size_bytes=22070385582 layers=26
+docker_images_size=69.8GB
+--- (1) raw docker save stream length
+raw_tar_bytes=22070416384
+--- (2) save | pigz -> /home/x/image-export/vllm-gfx906-6ec669c822e8.tar.gz
+save_pigz_seconds=261
+artifact_bytes=21948501759
+compression: raw 20.55 GB -> gz 20.44 GB, saved 0.6%, ratio 1.01x
+--- read-back: gzip integrity + layer count through tar (a rollback point
+    that only loads because the layers are already in this store proves nothing)
+read_back_seconds=19
+layer_tar_members=0
+tar_members=32
+json_manifest_members=2
+7a03514a37aed98b398e6775816136b4548cd7bd9ac8220c272316c0c31d3646  /home/x/image-export/vllm-gfx906-6ec669c822e8.tar.gz
+--- docker load round trip
+load_output=Loaded image: vllm-gfx906:latest
+LOADBACK_ID_MATCH sha256:6ec669c822e854dedcbde5f2cef743fabee4ac204c9fd921fe8abb71a522fa59
+--- existing artifacts in /home/x/image-export
+21948507480 20.44 GB  vllm-gfx906-1e18c8ea6b8b-p05.tar.gz
+123 0.00 GB  vllm-gfx906-1e18c8ea6b8b-p05.tar.gz.sha256
+21948501759 20.44 GB  vllm-gfx906-6ec669c822e8.tar.gz
+119 0.00 GB  vllm-gfx906-6ec669c822e8.tar.gz.sha256
+/dev/nvme0n1p2  915G  544G  325G   63% /
+=== EXPORT DONE 2026-09-08T12:00:35+08:00 boot_since=2026-09-08 00:06:18
+NO_REBOOT_DURING_RUN
+P05_EXPORT_ALL_DONE

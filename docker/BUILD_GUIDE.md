@@ -109,11 +109,41 @@ vLLM 编译 3.6G + 1.8G AOT W4A16，而缓存键不含内核选择），且 `pha
 
 - 抽取：`bash docker/prepare_build_context.sh vllm-gfx906` → `build-context/` 共 7.0G（其中 dist-packages 包 6.8G）
 - 构建：`docker build --target rebuild -t vllm-gfx906:rebuilt build-context/`，15 步全过，含 gfx906 关键件自检与"交付镜像内 `/root/.cache` 必须为空"的泄漏断言
-- 体积：内容 22.07GB / 解包 69.8GB；比快照派生的路径 A 产物（25.6GB / 83.1GB）小约 3.5GB
+- 体积：`inspect .Size` 22.07GB（= containerd 存储里压缩层 blob 之和，也等于 `docker save` 的流字节数）
+  / `docker images` 69.8GB（解包态）。比快照派生的路径 A 产物（25.6GB / 83.1GB）小约 3.5GB
+  ⇒ **传输按 22 GB 算，对端磁盘按 70 GB 算**，两者不是一回事（机制见 P0.5 复测那节）
 - 全新容器（只带 QUICKSTART 里的 run flag + 只读模型挂载）实测：`gfx906-selfcheck` 全绿 → 冷启动 **711s**（torch.compile 384s）→ `Using WNA16ExllamaKernel`、KV 66,749 tokens、文本正确、warm decode **22.0 tok/s**、图像 6/6；第二次启动 **420s**（compile 31s，557M 缓存留在容器可写层）
 - 顺带修掉配方缺陷：运行时 ENV 原先只写在路径 A 的 final 阶段，重建出的镜像里没有 `HSA_OVERRIDE_GFX_VERSION` / `VLLM_WNA16_EXLLAMA`（表现为静默退回 Triton W4A16 内核）→ 现在两条路径共用同一份 ENV 声明
 - 编译缓存不进镜像（Dockerfile 里有断言兜着）；开发容器里的三份缓存留着自用
 - 验证用的一次性容器名为 `vllm-gfx906-rc`，用完 stop，可 `docker rm -f` 重建
+
+### P0.5 后的交付态复测与镜像归档（2026-09-08）
+
+- 当前交付产物：`:latest` = **`b5931bb5c742`**（Path A，基于 Path B 产物 `:rebuilt` = `0d2dc5a67297`）。
+  这一轮只改了随镜像分发的 `entrypoint/QUICKSTART.md`，流程按 P0.5 定的规矩走：仓库 → `docker cp`
+  进开发容器 → `prepare_build_context.sh` → B → A → 镜像内 md5 复验 → 真机 `gfx906-selfcheck`
+  （20 ok / 0 FAIL），三方 + 镜像内 md5 一次通过。**教训**：改 `docker/entrypoint/*` 一次的代价是
+  一整轮 B→A 构建 + 一次 22 GB 重导（今天为这份文档走了三轮，ID 因此滚了三次）⇒ **攒够一批再走。**
+- **交付时钟（sclk auto，不钉频）全新空缓存容器**：冷启动 **710s / torch.compile 384.32s**，
+  同容器 warm **420s / 67.41s**（缓存 552 MB 留在可写层）⇒ 与 C2 的 711/384 一致，P0.5 换内核没有
+  给启动加成本。warm 的 compile 项从 C2 的 31s 变成 67s 而总时长不变，**该项构成变化未查**。
+- **serve 路径 decode 实测 32.4 tok/s**（64 token 请求，与 C2 那个 22.0 同探针 ⇒ **+47%**）；
+  256 token 三次 32.5 / 32.6 / 32.6；8 并发合计 66.3 tok/s。KV：冷臂 67,356 / warm 臂 64,929
+  （warm 两次同值），**这 3.6% 的冷热差未定位** ⇒ 容量规划按低值。
+- **归档（回滚点，也给 #18 定量）**：`/home/x/image-export/vllm-gfx906-b5931bb5c742.tar.gz`
+  = 21,948,506,214 B，`docker save` 原始流实测 22,070,416,384 B ⇒ **pigz 只省 0.6%（1.01×），261s**。
+  自包含性证明 = tar **32 个成员、成员字节和 22,070,390,489 B = 原始流的 100.0%**，三个 ~7.3 GB blob
+  占全文 99.6%；`pigz -dc | tar -tvf -` 全量回读 21s（顺带验流未损）；`docker load` 回读 ID 一致。
+  目录里另有两份同尺寸归档（`1e18c8ea6b8b`、`6ec669c822e8`），只差那份文档，可按需删。
+- **为什么 .Size 与 docker images 差 3 倍、为什么压不动**（一条机制解释两个现象）：宿主 docker 用
+  **containerd 镜像存储**（`Storage Driver: overlayfs` + `driver-type: io.containerd.snapshotter.v1`，
+  media type `oci.image.index.v1+json`），`docker save` 导出的是 `blobs/sha256/<digest>` 形式的
+  **已压缩层 blob**（所以 tar 里没有 `layer.tar`）。`.Size` 是压缩态之和 = save 流字节数；
+  `docker images` 那栏是解包态。⇒ 传输按 22 GB、对端磁盘按 70 GB，再压一遍是白工。
+- 载体脚本（都在仓库根，宿主 `/home/x/vllm-work/p0/`）：`p05_cold_serve.sh`（冷+warm+首次归档）、
+  `p05_serve_probe.sh`（tok/s，model id 从 `/v1/models` 解析）、`p05_ship_doc.sh`（entrypoint 推送
+  到位 + 两条路径重建 + 复验）、`p05_export_image.sh`（原始流测长 + 归档 + 回读）。
+  日志：`logs/p0/p05_cold.log`、`logs/p0/p05_probe.log`。
 
 ## 运维注意事项（血泪教训）
 

@@ -1,0 +1,93 @@
+=== P05 COLD/SERVE/EXPORT START 2026-09-08T10:57:29+08:00 boot_since=2026-09-08 00:06:18
+image sha256:1e18c8ea6b8bb789ff50f3bf26bba4890f34d90005782504c0619e325f2a1f65 size 22070384441
+/dev/nvme0n1p2  915G  503G  367G   58% /
+--- starting fresh container from vllm-gfx906:latest
+--- cache must be empty in a delivery container:
+ls: cannot access '/root/.cache': No such file or directory
+(no /root/.cache)
+=== PHASE 1 (cold) 2026-09-08T10:57:29+08:00
+########## serve_once tag=cold 2026-09-08T02:57:29+00:00
+ENV: SKINNY=unset(=True) cache_du=none
+preflight_vram_free_GB: [17.1, 17.1]
+SELFCHECK_RC=0 ok=20 fail=0
+cold_READY_AFTER=710s
+torch.compile took 384.32 s
+Using WNA16ExllamaKernel for CompressedTensorsWNA16
+GPU KV cache size: 67,356 tokens, Maximum concurrency for 16,384 tokens per request: 4.11x
+[serve] model=/home/x/models/vllm/Qwen3.8-27B-OBLITERATED-AWQ-W4A16 tp=2 dtype=float16 max_len=16384 max_seqs=48 graph=FULL_DECODE_ONLY mm={"image":1,"video":1} custom_ar=0 w4a16=exllama cache=/root/.cache/vllm-w4a16-exllama
+skinny_log_lines=0
+Traceback (most recent call last):
+  File "<stdin>", line 14, in <module>
+  File "<stdin>", line 10, in ask
+  File "/usr/lib/python3.12/urllib/request.py", line 215, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 521, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 630, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 559, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 492, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 639, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 404: Not Found
+--- cache footprint after cold start:
+186M	/root/.cache/comgr
+232K	/root/.cache/tvm-ffi
+552M	/root/.cache/vllm-w4a16-exllama
+remaining vllm procs: 2
+--- thermal gap before the warm restart 2026-09-08T11:10:08+08:00
+=== PHASE 2 (warm, same container, cache now populated) 2026-09-08T11:13:08+08:00
+########## serve_once tag=warm 2026-09-08T03:13:08+00:00
+ENV: SKINNY=unset(=True) cache_du=737M
+preflight_vram_free_GB: [17.1, 17.1]
+warm_READY_AFTER=420s
+torch.compile took 67.68 s
+Using WNA16ExllamaKernel for CompressedTensorsWNA16
+GPU KV cache size: 64,929 tokens, Maximum concurrency for 16,384 tokens per request: 3.96x
+[serve] model=/home/x/models/vllm/Qwen3.8-27B-OBLITERATED-AWQ-W4A16 tp=2 dtype=float16 max_len=16384 max_seqs=48 graph=FULL_DECODE_ONLY mm={"image":1,"video":1} custom_ar=0 w4a16=exllama cache=/root/.cache/vllm-w4a16-exllama
+skinny_log_lines=0
+Traceback (most recent call last):
+  File "<stdin>", line 14, in <module>
+  File "<stdin>", line 10, in ask
+  File "/usr/lib/python3.12/urllib/request.py", line 215, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 521, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 630, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 559, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 492, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 639, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 404: Not Found
+--- cache footprint after warm start:
+186M	/root/.cache/comgr
+232K	/root/.cache/tvm-ffi
+552M	/root/.cache/vllm-w4a16-exllama
+remaining vllm procs: 4
+=== PHASE 3 (export rollback artifact) 2026-09-08T11:20:48+08:00
+/dev/nvme0n1p2  915G  503G  366G   58% /
+docker save|pigz rc=0
+artifact_bytes=21948507480
+54957206bf7e32c2d7a007613f12a19b2e6838fcc2117e2b72dff42b12c51101  /home/x/image-export/vllm-gfx906-1e18c8ea6b8b-p05.tar.gz
+--- load-back proof (a rollback point that cannot be loaded is nothing)
+Loaded image: vllm-gfx906:latest
+LOADBACK_ID_MATCH sha256:1e18c8ea6b8bb789ff50f3bf26bba4890f34d90005782504c0619e325f2a1f65
+/dev/nvme0n1p2  915G  524G  345G   61% /
+=== P05 COLD/SERVE/EXPORT DONE 2026-09-08T11:26:26+08:00 boot_since=2026-09-08 00:06:18
+NO_REBOOT_DURING_RUN
+P05_COLD_ALL_DONE

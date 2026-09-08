@@ -22,6 +22,9 @@ docker run -d --name vllm-gfx906 \
 
 如果拿到的是 tar 包，先导一次：`docker load -i vllm-gfx906.tar`
 
+归档本身约 **22 GB**（层在 containerd 存储里已是压缩态，再 gzip 只能省 0.6%），但**解包后要 ~70 GB
+磁盘** —— 准备磁盘请按 70 GB 算，不要按归档大小算。
+
 ## 2. 自检
 
 ```bash
@@ -38,7 +41,7 @@ docker exec -it vllm-gfx906 gfx906-serve /models/Qwen3.8-27B-OBLITERATED-AWQ-W4A
 
 不带路径时会自动在 `$MODELS_ROOT`（默认 `/models`）下找唯一模型。第一行 `[serve] ...` 打印解析后的实际配置，方便确认。
 
-**首次启动慢是正常现象**：默认开启 CUDA graph，torch.compile 要几分钟。交付镜像（无任何编译缓存）实测：**冷启动 711s 就绪**（其中编译 384s），**有缓存 420s**（编译仅 31s）。编译产物落在 `~/.cache/vllm-w4a16-exllama`（约 560MB），位于容器可写层——`docker stop/start/restart` 会保留，只有 `docker rm` 后新建容器才会再编译一次。若改了 `MAX_LEN`/`TP`/图模式/内核选择导致编译键变化，或想跳过编译对照性能，可用 `EAGER=1`。
+**首次启动慢是正常现象**：默认开启 CUDA graph，torch.compile 要几分钟。交付镜像（无任何编译缓存）实测：**冷启动 710s 就绪**（其中编译 384s），**有缓存 420s**（编译 67s）。两个数都是在含 P0.5 改动的镜像上、全新容器 + 交付时钟（sclk auto）重测的：冷启动与 P0.5 之前的 711s/384s 逐项一致；warm 臂总时长仍是 420s，但日志里的 `torch.compile took` 从之前的 31s 变成 67s（**该项构成变化的原因未细查**，端到端等待时间没变）。编译产物落在 `~/.cache/vllm-w4a16-exllama`（552MB），位于容器可写层——`docker stop/start/restart` 会保留，只有 `docker rm` 后新建容器才会再编译一次。若改了 `MAX_LEN`/`TP`/图模式/内核选择导致编译键变化，或想跳过编译对照性能，可用 `EAGER=1`。
 
 ## 4. 调用
 
@@ -85,14 +88,19 @@ curl -s localhost:8000/v1/chat/completions -H "Content-Type: application/json" \
 
 ## 6. 实测基线（Qwen3.8-27B AWQ W4A16，TP2，2×gfx906）
 
-- decode：batch1 **22.0 tok/s**、batch8 合计 ~70 tok/s（eager 14.6 → graph +50%；**均为 P0.5 之前的读数**）
+- decode：**serve 路径在交付时钟（sclk auto，不钉频）实测 batch1 32.4 tok/s**（64 token 请求；256
+  token 长解码三次 = 32.5 / 32.6 / 32.6，取满 3 次即 **32.6**）；8 并发合计 **66.3 tok/s**
+  （每流 8.3）。64 token 这一档与 P0.5 之前的 22.0 tok/s 是**同一探针口径** ⇒ 可直接比，**+47%**。
+  eager 时代的 14.6 tok/s 到 graph 后 22.0，是这一档更早的基线。
 - **P0.5（本镜像已含）**：M=1 稠密 fp16 GEMM（GDN `in_proj_ba` + `lm_head`）改走 ROCm skinny
-  `LLGemm1_kernel`，同一模型离线口径实测 step **53.663 → 33.008 ms = 18.6 → 30.3 tok/s（+62.6%）**，
-  条件 1425/1000 MHz 钉频、batch1、`FULL_DECODE_ONLY`、贪心 256 token 逐字不变。
-  按 sclk 比例外推到交付时钟（1700/auto）约 **36 tok/s**——**外推值，serve 路径尚未复测**，
-  且满载结温超 100°C 会降频，取数请等冷卡。
+  `LLGemm1_kernel`。离线 harness 口径（1425/1000 MHz 钉频、batch1、`FULL_DECODE_ONLY`、贪心 256
+  token 逐字不变）step **53.663 → 33.008 ms = 18.6 → 30.3 tok/s（+62.6%）**。
+  此前按 sclk 比例从 30.3 外推交付态约 36 tok/s，**实测只有 32.6 —— 外推偏乐观约 10%**：decode 里
+  访存受限的那半不随 sclk 缩放，且外推拿的是离线 harness、实测拿的是 serve（多一层 API/调度/分词
+  开销）。两个口径不要混用。满载结温超 100°C 会降频，取数请等冷卡。
 - prefill（A2 基线，eager 口径）：2K **442.8** / 8K **346.6** / 16K **235.0** tok/s
 - KV 容量：默认图像配置下 **66,749 tokens**（16K 上下文可 4.07 并发）；纯文本 18K × 5 并发实测 92,842 tokens
+- KV 容量（`gfx906-serve` 路径）：冷臂 **67,356**（4.11×）/ warm 臂 **64,929**（3.96×，两次启动给出同一数字）。**冷高 warm 低这 3.6% 未定位**，别把 KV 当成一个恒定值来容量规划
 - 带图请求：全热态单张图问答 5.0s（关键词判定 6/6）
 - 带视频请求（eager 口径，合成"红方块左右移"）：4 / 8 / 16 帧 = prompt 311 / 551 / 1031 tokens，4.3 / 5.6 / 7.3s，方向与颜色判定 3/3
 - 首次带视觉启动慢（ViT Triton JIT）；镜像不含 Triton 缓存，但已包含在上面的冷启动计时内
@@ -114,7 +122,7 @@ curl -s localhost:8000/v1/chat/completions -H "Content-Type: application/json" \
 | 普通 matmul 段错误 | Tensile gfx906 补丁文件缺失 → `selfcheck` 的 kernel 计数项 |
 | 输出乱码 / 全是 `!` | W4A16 桥接或 `gptq_gemm_out` 不在 → `selfcheck` 后四项；再 `EAGER=1` 对照 |
 | 启动 profile 阶段报 `expected size 640==5120, stride 8192==1024` | 编译缓存与当前 W4A16 内核选择串台（缓存键不含内核选择）→ 用 `gfx906-serve` 起即自动隔离；手工起可清 `~/.cache/vllm*` |
-| decode 只有个位数 tok/s | 多半是走了 Triton W4A16（实测 3.9 tok/s）而不是 ExLlama 桥接（21.9 tok/s）→ 确认 `VLLM_WNA16_EXLLAMA=1`，看日志 `Using WNA16ExllamaKernel` |
+| decode 只有个位数 tok/s | 多半是走了 Triton W4A16（实测 3.9 tok/s）而不是 ExLlama 桥接（交付时钟 serve 路径实测 **32.4 tok/s**，P0.5 前是 21.9）→ 确认 `VLLM_WNA16_EXLLAMA=1`，看日志 `Using WNA16ExllamaKernel` |
 | 视频请求返回 400 Bad Request | 内容块必须是 `{"type":"video_url","video_url":{"url":...}}` 且 url 指向真实视频文件（mp4，可用 base64 data URL）；帧列表写法不被 serving 接口接受 |
 | OOM | 降 `MAX_LEN` / `GPU_MEM_UTIL`，或 `--limit-mm-per-prompt` 里 image/video 设 0 |
 | 想逐项排除图执行问题 | `EAGER=1` vs 默认，对比 `[serve]` 行与 tok/s |

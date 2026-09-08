@@ -1,0 +1,18 @@
+=== P05 SERVE PROBE START 2026-09-08T11:28:03+08:00 boot_since=2026-09-08 00:06:18
+preflight_vram_free_minGB=17.142120448
+cache in this container: 552M(/root/.cache/vllm-w4a16-exllama) 
+PROBE_READY_AFTER=420s
+torch.compile took 67.41 s
+GPU KV cache size: 64,929 tokens, Maximum concurrency for 16,384 tokens per request: 3.96x
+v1/models: {"object":"list","data":[{"id":"Qwen3.8-27B-OBLITERATED-AWQ-W4A16","object":"model","created":1788838506,"owned_by":"vllm","root":"/home/x/models/vllm/Qwen3.8-2
+resolved_model_id=Qwen3.8-27B-OBLITERATED-AWQ-W4A16
+REQ1: 9.0 tok/s ' Paris.\nParis is a city in France.\nParis'
+REQ2_WARM: 32.4 tok/s
+DECODE256 rep1: 32.6 tok/s  (230 tok / 7.1s) '\n\n<think>\n用户问的是：为什么显卡的显存'
+DECODE256 rep2: 32.5 tok/s  (256 tok / 7.9s) '\n\n<think>\n用户问的是：为什么显卡的显存'
+DECODE256 rep3: 32.6 tok/s  (230 tok / 7.1s) '\n\n<think>\n用户问的是：为什么显卡的显存'
+DECODE256 best=32.6 mean=32.6
+--- batch8 sanity (max_num_seqs=48, same as the 1425MHz A/B arm):
+BATCH8: 288 tok total over 4.3s = 66.3 tok/s aggregate, per-stream 8.3
+remaining vllm procs after teardown: 6
+=== P05 SERVE PROBE DONE 2026-09-08T11:36:19+08:00 boot_since=2026-09-08 00:06:18
