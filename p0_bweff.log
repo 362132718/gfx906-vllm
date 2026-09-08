@@ -1,0 +1,39 @@
+# p0_bweff.log -- Task 1 evidence, 2026-09-04, cards pinned to DPM level 8 (1700MHz),
+# unlocked back to auto afterwards (see tail of each run).
+
+$ bash /home/x/vllm-work/p0/p0_bweff.sh
+LOCKED /sys/class/drm/card0/device -> 1700MHz
+LOCKED /sys/class/drm/card1/device -> 1700MHz
+device: AMD Radeon Pro VII
+working_set= 0.25 GiB  read_bw=  883.7 GB/s
+working_set= 1.00 GiB  read_bw=  927.6 GB/s
+working_set= 4.00 GiB  read_bw=  927.6 GB/s
+BW_eff = 928 GB/s
+device: AMD Radeon Pro VII
+working_set= 0.25 GiB  read_bw=  883.2 GB/s
+working_set= 1.00 GiB  read_bw=  917.2 GB/s
+working_set= 4.00 GiB  read_bw=  928.2 GB/s
+BW_eff = 928 GB/s
+unlocked ... level=auto active=860Mhz   (both cards)
+
+$ bash /home/x/vllm-work/p0/p0_clock.sh lock && docker exec -e DEV=0 vllm-gfx906 python /work/p0/p0_bweff_check.py
+buffer        = 4.0 GiB
+torch.sum     =   821.5 GB/s  (5.2 ms)
+copy r+w      =   787.4 GB/s  (10.9 ms)  [traffic counted twice]
+ratio copy/read = 2.09  (expect ~1.8-2.3 if the read number is real)
+
+## Conclusion
+* The external prior (clpeak MI50 @1725MHz: float 766 / float2 757 / float4 741 GB/s)
+  UNDERSTATES this card's achievable pure-read bandwidth by 7-21%. It is not used.
+* Two independent implementations agree the real number is in the 820-930 GB/s band:
+    - 928 GB/s  hand-written Triton read-stream (the class of kernel #20 will be)
+    - 821 GB/s  torch.sum reduction (a library kernel, less optimally vectorised)
+* Floor used for every #20 judgement = 821 GB/s (the conservative one, i.e. the number
+  that does NOT flatter the case for writing the kernel). 928 is recorded as the
+  measured pure-read ceiling.
+* Consequence for the section 2 VALU budget: at 821 GB/s the budget is
+  6.62e12 / (821e9/0.5) = 4.03 op/weight against 3.85 needed with the zp hoist
+  -> headroom ~4.6%, not the ~13% an external review derived from 760 GB/s.
+  At 928 GB/s the budget falls to 3.56 -> the kernel would be VALU-bound, not
+  bandwidth-bound. Either way #20 lives or dies on measured per-shape efficiency
+  (Task 4), not on distance to a bandwidth floor.

@@ -1,0 +1,22 @@
+BW_eff = 931 GB/s, dtype=torch.float16, device=AMD Radeon Pro VII
+
+gdn_in_proj_ba   K=5120   N=96      x48 /step  weight=0.98 MB/rank
+   mm_KN   eager=   429.4 graph=   436.9 us      2.3 GB/s =   0.2% of floor (1.1 us)  ->   20.97 ms/step
+   mm_NK   eager=   310.4 graph=   318.1 us      3.1 GB/s =   0.3% of floor (1.1 us)  ->   15.27 ms/step
+   mv_NK   eager=   798.7 graph=   805.1 us      1.2 GB/s =   0.1% of floor (1.1 us)  ->   38.64 ms/step
+   mulsum  eager=    19.0 graph=    22.2 us     44.3 GB/s =   4.8% of floor (1.1 us)  ->    1.06 ms/step
+
+gdn_in_proj_a    K=5120   N=48      x48 /step  weight=0.49 MB/rank
+   mm_KN   eager=   429.7 graph=   436.6 us      1.1 GB/s =   0.1% of floor (0.5 us)  ->   20.96 ms/step
+   mm_NK   eager=   310.7 graph=   318.2 us      1.5 GB/s =   0.2% of floor (0.5 us)  ->   15.27 ms/step
+   mv_NK   eager=   798.4 graph=   804.5 us      0.6 GB/s =   0.1% of floor (0.5 us)  ->   38.61 ms/step
+   mulsum  eager=    17.9 graph=    20.6 us     23.8 GB/s =   2.6% of floor (0.5 us)  ->    0.99 ms/step
+
+lm_head          K=5120   N=124160  x1  /step  weight=1271.40 MB/rank
+   mm_KN   eager=  5116.4 graph=  5123.6 us    248.1 GB/s =  26.7% of floor (1365.6 us)  ->    5.12 ms/step
+   mm_NK   eager=  6638.0 graph=  6661.8 us    190.8 GB/s =  20.5% of floor (1365.6 us)  ->    6.66 ms/step
+   mv_NK   eager= 15261.6 graph= 15274.0 us     83.2 GB/s =   8.9% of floor (1365.6 us)  ->   15.27 ms/step
+   mulsum  skipped (product temp too large)
+
+wrote /work/p0/p0_dense.json
+trace said 48/step @ 318 us and 1/step @ 6982 us. A form that reaches the floor on the same operands is a drop-in; the gap between mm_KN and the best form is time that can be reclaimed without touching W4A16.

@@ -1,0 +1,19 @@
+device: AMD Radeon Pro VII
+working_set= 0.25 GiB  read_bw=  865.9 GB/s
+working_set= 1.00 GiB  read_bw=  920.0 GB/s
+working_set= 4.00 GiB  read_bw=  931.2 GB/s
+BW_eff = 931 GB/s
+=== launchcost ===
+eager  single launch+sync: 11.68 us -> 240/token = 2.80 ms
+graph  n=1    total   16.80 us, 16.800 us/node (replay cost included)
+graph  n=60   total  147.52 us, 2.459 us/node (replay cost included)
+graph  n=240  total  544.64 us, 2.269 us/node (replay cost included)
+graph  replay overhead ~16.80 us ; marginal cost per node = 2.209 us
+240 extra launches/token = 0.53 ms/token -> verdict: persistent/last-block reduction is required for Split-K
+=== shapes@350 ===
+worst 14% (K=8704,N=5120)  best 28% (K=5120,N=17408)
+count-weighted eff = 19% of BW_eff  (arithmetic mean of shapes: 19%)
+predicted in-engine GEMV = 33824 us/step/rank (floor if perfect: 6788 us)
+=== clocks restored ===
+/sys/class/drm/card0/device level=manual sclk=1425Mhz  mclk=1000Mhz 
+/sys/class/drm/card1/device level=manual sclk=1425Mhz  mclk=1000Mhz 

@@ -1,0 +1,19 @@
+BW_eff = 821 GB/s, dtype=torch.float16, device=AMD Radeon Pro VII
+
+gdn_in_proj_ba   K=5120   N=96      x48 /step  weight=0.98 MB/rank
+   mm_KN   eager=   429.6 graph=   439.2 us      2.2 GB/s =   0.3% of floor (1.2 us)  ->   21.08 ms/step
+   mm_NK   eager=   311.3 graph=   320.6 us      3.1 GB/s =   0.4% of floor (1.2 us)  ->   15.39 ms/step
+   mv_NK   eager=   800.1 graph=   808.1 us      1.2 GB/s =   0.1% of floor (1.2 us)  ->   38.79 ms/step
+
+gdn_in_proj_a    K=5120   N=48      x48 /step  weight=0.49 MB/rank
+   mm_KN   eager=   429.9 graph=   438.9 us      1.1 GB/s =   0.1% of floor (0.6 us)  ->   21.07 ms/step
+   mm_NK   eager=   311.8 graph=   320.5 us      1.5 GB/s =   0.2% of floor (0.6 us)  ->   15.38 ms/step
+   mv_NK   eager=   798.0 graph=   806.9 us      0.6 GB/s =   0.1% of floor (0.6 us)  ->   38.73 ms/step
+
+lm_head          K=5120   N=124160  x1  /step  weight=1271.40 MB/rank
+   mm_KN   eager=  5113.2 graph=  5124.6 us    248.1 GB/s =  30.2% of floor (1548.6 us)  ->    5.12 ms/step
+   mm_NK   eager=  6585.6 graph=  6617.9 us    192.1 GB/s =  23.4% of floor (1548.6 us)  ->    6.62 ms/step
+   mv_NK   eager= 15263.9 graph= 15274.0 us     83.2 GB/s =  10.1% of floor (1548.6 us)  ->   15.27 ms/step
+
+wrote /work/p0/p0_dense.json
+trace said 48/step @ 318 us and 1/step @ 6982 us. A form that reaches the floor on the same operands is a drop-in; the gap between mm_KN and the best form is time that can be reclaimed without touching W4A16.

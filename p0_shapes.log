@@ -1,0 +1,44 @@
+# p0_shapes.log -- Task 2 evidence (2026-09-04/05), model Qwen3.8-27B-OBLITERATED-AWQ-W4A16, TP2
+
+## Instrument note (why this task took three tries)
+1. v1 hook called torch.cuda.is_current_stream_capturing() inside apply_weights -> that function is
+   inside the dynamo-traced region, so engine init died with "torch.* op returned non-Tensor"
+   (stack pointed at qwen_gdn_linear_attn.py forward_hip, i.e. misleading). Hot path now does a
+   pure-python int/list append only.
+2. Dump at atexit only -> vLLM hard-kills TP workers, so just the APIServer's empty CSV appeared.
+   Now every vLLM pid gets SIGUSR1 before teardown.
+3. Fundamentally: with FULL cudagraphs, decode never re-executes Python, so a python hook cannot
+   observe graph replay. The graph-mode census therefore shows prefill only; the eager census
+   (EAGER=1) shows every step.
+
+## Graph-mode census (FULL_DECODE_ONLY, one request of 8 tokens, startup 420s)
+/work/p0/wna16_shapes.graph.csv.*  -- both ranks identical:
+     16  m=14, k=5120, n=7168     attn qkv_proj
+     64  m=14, k=3072, n=5120     attn o_proj + GDN out_proj (same shape)
+     64  m=14, k=5120, n=17408    mlp gate_up_proj
+     64  m=14, k=8704, n=5120     mlp down_proj
+     48  m=14, k=5120, n=8192     GDN in_proj_qkvz
+=> 256 W4A16 projections per forward pass, 5 distinct (K,N) shapes.
+=> startup log: cudagraph_capture_sizes [1,2,4,8,16,24,32,48], "Capturing CUDA graphs (decode, FULL): 8/8",
+   "Graph capturing finished in 4 secs, took 0.36 GiB".
+
+## Eager census (EAGER=1, same request) -- closes the M=1 question
+/work/p0/wna16_shapes.eager.csv.2300:
+    448  m=1,  k=3072, n=5120
+    448  m=1,  k=5120, n=17408
+    112  m=1,  k=5120, n=7168
+    336  m=1,  k=5120, n=8192
+    448  m=1,  k=8704, n=5120
+     64  m=14, ...   (prefill of the 14-token prompt)
+     64  m=48, ...   (memory-profiling dummy batch)
+     64  m=2048, ... (prefill chunk = max_num_batched_tokens)
+Counts are exactly 7 decode steps x per-pass calls (16/64/64/64/48), so at batch 1 the kernel
+receives M=1.  Same request also runs M=14/48/2048 => dispatch must gate on M == 1 strictly.
+
+## Corrections this forced into the spec
+* GDN in_proj_qkv + in_proj_z are fused at runtime into in_proj_qkvz => per-rank N=8192, and the
+  previously assumed (5120,5120)+(5120,3072) pair does not exist.
+* attn o_proj and GDN out_proj share (3072,5120) => 5 distinct shapes, not 7.
+* Per token: 256 GEMV (earlier figures 450 / 304 / external 160 were all wrong), of which 192
+  need Split-K => ~448 launches/token including reduce kernels.
+* allreduce count is 128/token (o_proj 16 + down_proj 64 + GDN out_proj 48), not 80.

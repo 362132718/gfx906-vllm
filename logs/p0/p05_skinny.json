@@ -1,0 +1,177 @@
+{
+ "bw_eff_gb_s": 931.0,
+ "bf16_ok": true,
+ "rows": [
+  {
+   "case": "in_proj_ba",
+   "m": 48,
+   "k": 5120,
+   "rpb": 4,
+   "dtype": "float16",
+   "contig": true,
+   "gemv_us": 4.6,
+   "tensile_us": 309.4,
+   "gb_s": 107.5,
+   "pct_bw_eff": 11.5,
+   "rel_vs_fp64": 0.0004118390435584156,
+   "rel_tensile_vs_fp64": 0.00019722126382945874,
+   "determinism": "stable",
+   "out_shape": [
+    1,
+    48
+   ]
+  },
+  {
+   "case": "lm_head",
+   "m": 124160,
+   "k": 5120,
+   "rpb": 4,
+   "dtype": "float16",
+   "contig": true,
+   "gemv_us": 1468.3,
+   "tensile_us": 6637.4,
+   "gb_s": 865.9,
+   "pct_bw_eff": 93.0,
+   "rel_vs_fp64": 0.0004773143045786348,
+   "rel_tensile_vs_fp64": 0.00041260560404796234,
+   "determinism": "stable",
+   "out_shape": [
+    1,
+    124160
+   ]
+  },
+  {
+   "case": "in_proj_ba_bf16",
+   "m": 48,
+   "k": 5120,
+   "rpb": 4,
+   "dtype": "bfloat16",
+   "contig": true,
+   "gemv_us": 6.6,
+   "tensile_us": 1181.2,
+   "gb_s": 74.9,
+   "pct_bw_eff": 8.0,
+   "rel_vs_fp64": 0.004414667869998421,
+   "rel_tensile_vs_fp64": 0.0023580214642192772,
+   "determinism": "stable",
+   "out_shape": [
+    1,
+    48
+   ]
+  },
+  {
+   "case": "lm_head_bf16",
+   "m": 124160,
+   "k": 5120,
+   "rpb": 4,
+   "dtype": "bfloat16",
+   "contig": true,
+   "gemv_us": 1851.7,
+   "tensile_us": 45276.8,
+   "gb_s": 686.6,
+   "pct_bw_eff": 73.7,
+   "rel_vs_fp64": 0.003806784457541856,
+   "rel_tensile_vs_fp64": 0.0026503939575198867,
+   "determinism": "stable",
+   "out_shape": [
+    1,
+    124160
+   ]
+  },
+  {
+   "case": "noncontig_weight",
+   "m": 48,
+   "k": 5120,
+   "rpb": 4,
+   "dtype": "float16",
+   "contig": false,
+   "gemv_us": 4.6,
+   "tensile_us": 427.9,
+   "gb_s": 107.8,
+   "pct_bw_eff": 11.6,
+   "rel_vs_fp64": 1.3572636236075182,
+   "rel_tensile_vs_fp64": 0.00022052431356570193,
+   "determinism": "stable",
+   "out_shape": [
+    1,
+    48
+   ]
+  },
+  {
+   "case": "rpb1_m48",
+   "m": 48,
+   "k": 5120,
+   "rpb": 1,
+   "dtype": "float16",
+   "contig": true,
+   "gemv_us": 4.6,
+   "tensile_us": 309.5,
+   "gb_s": 107.6,
+   "pct_bw_eff": 11.6,
+   "rel_vs_fp64": 0.0004118390435584156,
+   "rel_tensile_vs_fp64": 0.00019722126382945874,
+   "determinism": "stable",
+   "out_shape": [
+    1,
+    48
+   ]
+  },
+  {
+   "case": "rpb2_m48",
+   "m": 48,
+   "k": 5120,
+   "rpb": 2,
+   "dtype": "float16",
+   "contig": true,
+   "gemv_us": 4.2,
+   "tensile_us": 309.5,
+   "gb_s": 117.2,
+   "pct_bw_eff": 12.6,
+   "rel_vs_fp64": 0.0004118390435584156,
+   "rel_tensile_vs_fp64": 0.00019722126382945874,
+   "determinism": "stable",
+   "out_shape": [
+    1,
+    48
+   ]
+  },
+  {
+   "case": "rpb4_m48",
+   "m": 48,
+   "k": 5120,
+   "rpb": 4,
+   "dtype": "float16",
+   "contig": true,
+   "gemv_us": 4.6,
+   "tensile_us": 309.4,
+   "gb_s": 107.5,
+   "pct_bw_eff": 11.5,
+   "rel_vs_fp64": 0.0004118390435584156,
+   "rel_tensile_vs_fp64": 0.00019722126382945874,
+   "determinism": "stable",
+   "out_shape": [
+    1,
+    48
+   ]
+  },
+  {
+   "case": "rpb8_m48",
+   "m": 48,
+   "k": 5120,
+   "rpb": 8,
+   "dtype": "float16",
+   "contig": true,
+   "gemv_us": 5.9,
+   "tensile_us": 309.3,
+   "gb_s": 83.5,
+   "pct_bw_eff": 9.0,
+   "rel_vs_fp64": 0.0004118390435584156,
+   "rel_tensile_vs_fp64": 0.00019722126382945874,
+   "determinism": "stable",
+   "out_shape": [
+    1,
+    48
+   ]
+  }
+ ]
+}

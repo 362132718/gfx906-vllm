@@ -1,0 +1,14 @@
+=== arm=off skinny=0 OUT=/work/p0/ab_off EXPECTED_MS=auto 2026-09-07T23:34:29+00:00
+(Worker_TP0 pid=2242) INFO 09-07 23:42:14 [monitor.py:53] torch.compile took 387.36 s in total
+prefill wall = 471.8 ms ; request(256 tok) wall = 14156.0 ms
+decode wall/step = 53.66 ms  (=> 18.6 tok/s)
+perf gate OK: 53.7 ms/step = 18.6 tok/s (expected 56.1 ms at 1425MHz)
+worker traces: 2 files, 4.7 MB, 27.9 s wall
+=== arm=off rc=0 2026-09-07T23:47:22+00:00
+=== arm=on skinny=unset(=True) OUT=/work/p0/ab_on EXPECTED_MS=33.1 2026-09-07T23:50:22+00:00
+(Worker_TP0 pid=2663) INFO 09-07 23:54:19 [monitor.py:53] torch.compile took 92.82 s in total
+prefill wall = 465.9 ms ; request(256 tok) wall = 8882.8 ms
+decode wall/step = 33.01 ms  (=> 30.3 tok/s)
+perf gate OK: 33.0 ms/step = 30.3 tok/s (expected 33.1 ms at 1425MHz)
+worker traces: 2 files, 4.4 MB, 22.8 s wall
+=== arm=on rc=0 2026-09-07T23:58:31+00:00

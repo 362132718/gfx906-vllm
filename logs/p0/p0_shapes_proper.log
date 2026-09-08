@@ -1,0 +1,9 @@
+BW_eff = 931 GB/s ; 256 GEMV calls/step/rank
+K= 3072 N= 5120 x64  eager=   50.6us graph=   38.7us floor=   8.8us ->  23% of BW_eff ( 211 GB/s)
+K= 5120 N= 7168 x16  eager=   83.8us graph=   71.9us floor=  20.5us ->  28% of BW_eff ( 265 GB/s)
+K= 5120 N= 8192 x48  eager=   88.6us graph=   76.5us floor=  23.4us ->  31% of BW_eff ( 285 GB/s)
+K= 5120 N=17408 x64  eager=   97.8us graph=   85.4us floor=  49.7us ->  58% of BW_eff ( 542 GB/s)
+K= 8704 N= 5120 x64  eager=  133.1us graph=  122.5us floor=  24.9us ->  20% of BW_eff ( 189 GB/s)
+worst 20% (K=8704,N=5120)  best 58% (K=5120,N=17408)
+count-weighted eff = 33% of BW_eff  (arithmetic mean of shapes: 32%)
+predicted in-engine GEMV = 20603 us/step/rank (floor if perfect: 6788 us)

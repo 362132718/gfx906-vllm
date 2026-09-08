@@ -1,0 +1,11 @@
+M=1 in_proj_ba-shaped -> skinny            LLMM1=1 want=1 ok
+M=1 replicated N=96 -> skinny              LLMM1=1 want=1 ok
+M=2 must stay on Tensile                   LLMM1=0 want=0 ok
+bias present -> fallback                   LLMM1=0 want=0 ok
+k=12288 > 8192 -> fallback                 LLMM1=0 want=0 ok
+m=50 (m%4!=0) -> fallback                  LLMM1=0 want=0 ok
+non-contiguous weight -> fallback          LLMM1=0 want=0 ok
+not gfx906 -> unchanged                    LLMM1=0 want=0 ok
+VLLM_ROCM_USE_SKINNY_GEMM=0 -> fallback    LLMM1=0 want=0 ok
+bf16 -> skinny (Task 1 bf16_ok)            LLMM1=1 want=1 ok
+ALL PASS

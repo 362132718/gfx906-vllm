@@ -1,0 +1,26 @@
+wall: 33.01 ms/decode-step = 30.3 tok/s (unprofiled, 256-token request, pin=1425.0MHz, capture_sizes=[1, 2, 4, 8, 16, 24, 32, 48])
+window (primary rank 0): K = 64 decode steps, span 4804.8 ms, 82176 device events = 1284 kernel-launches/step
+  rank 0: sum 2224.6 ms  union 2224.3 ms  span 4804.8 ms  worst gap 11.9 ms
+    WARN unseen device category UNSEEN-CATEGORY:Trace x1
+  rank 1: sum 2276.9 ms  union 2276.2 ms  span 4804.8 ms  worst gap 11.4 ms
+    WARN unseen device category UNSEEN-CATEGORY:Trace x1
+
+The window is taken under the torch profiler, which adds rank skew, so a profiled decode step runs 75.1 ms while the delivery step is 33.0 ms. All the extra is peer-wait: the compute rows below are profiler-independent and are the same per-step work in both. %wall uses the delivery step (what tok/s depends on); %win uses the profiled step (what the GPU was doing).
+
+bucket          us/step    %wall     %win  launches
+w4a16_gemv      19866.6    60.2%    26.5%     16384
+rccl_wait        7604.4    23.0%    10.1%      8320
+elementwise      4086.7    12.4%     5.4%     43456
+dense_gemv       1707.5     5.2%     2.3%      3136
+gdn               847.3     2.6%     1.1%      6144
+attention         513.6     1.6%     0.7%      3072
+memcpy            126.2     0.4%     0.2%      1600
+UNCLASSIFIED        7.6     0.0%
+         7.6 us/step  x64     _compute_slot_mapping_kernel.kd
+
+GPU occupied 0.46 of the profiled window (union/span, rank 0), but a third of that occupancy is nccl spin-wait.
+ROUTING NUMBER: compute-only busy = 27.1 ms kernel work / 33.01 ms delivery step = 0.82
+  rccl_wait in this window = 7604.4 us/step, i.e. 10% of the profiled step's slack; at delivery the step leaves only 5.9 ms for wait+bubbles, so the skew is profiler-induced, not a cross-rank/PCIe finding.
+W4A16 GEMV = 19867 us/step = 60.2% of the delivery step = 73.2% of compute
+dense fp16 GEMMs individually (launches/step identifies the owner):
+spec 1(c): <0.6 -> not a kernel problem | 0.6-0.8 mixed | >=0.8 kernel suspects (GEMV / attention / GDN)

@@ -1,0 +1,22 @@
+[
+ {
+  "case": "in_proj_ba[in_proj_a]",
+  "m": 48,
+  "k": 5120,
+  "rel_gemv_max": 0.000788,
+  "rel_tensile_max": 0.000408,
+  "ratio": 1.93,
+  "argmax_flips": "0/64",
+  "top1_margin_min": 0.00256
+ },
+ {
+  "case": "lm_head[8192/248320 rows]",
+  "m": 8192,
+  "k": 5120,
+  "rel_gemv_max": 0.000608,
+  "rel_tensile_max": 0.000449,
+  "ratio": 1.35,
+  "argmax_flips": "0/64",
+  "top1_margin_min": 0.00389
+ }
+]

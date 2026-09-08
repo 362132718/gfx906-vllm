@@ -1,0 +1,46 @@
+BW_eff = 821 GB/s, dtype=torch.float16, device=AMD Radeon Pro VII
+
+sweep32          K=5120   N=32      x1  /step  weight=0.33 MB/rank
+   mm_KN   eager=   430.4 graph=   439.4 us      0.7 GB/s =   0.1% of floor (0.4 us)  ->    0.44 ms/step
+   mm_NK   eager=   311.8 graph=   320.4 us      1.0 GB/s =   0.1% of floor (0.4 us)  ->    0.32 ms/step
+   mv_NK   eager=   798.9 graph=   806.6 us      0.4 GB/s =   0.0% of floor (0.4 us)  ->    0.81 ms/step
+   mulsum  eager=    20.3 graph=    22.3 us     14.7 GB/s =   1.8% of floor (0.4 us)  ->    0.02 ms/step
+
+sweep48          K=5120   N=48      x1  /step  weight=0.49 MB/rank
+   mm_KN   eager=   429.7 graph=   438.8 us      1.1 GB/s =   0.1% of floor (0.6 us)  ->    0.44 ms/step
+   mm_NK   eager=   311.3 graph=   320.4 us      1.5 GB/s =   0.2% of floor (0.6 us)  ->    0.32 ms/step
+   mv_NK   eager=   799.5 graph=   806.8 us      0.6 GB/s =   0.1% of floor (0.6 us)  ->    0.81 ms/step
+   mulsum  eager=    20.0 graph=    23.0 us     21.4 GB/s =   2.6% of floor (0.6 us)  ->    0.02 ms/step
+
+sweep96          K=5120   N=96      x1  /step  weight=0.98 MB/rank
+   mm_KN   eager=   429.7 graph=   438.9 us      2.2 GB/s =   0.3% of floor (1.2 us)  ->    0.44 ms/step
+   mm_NK   eager=   311.0 graph=   320.5 us      3.1 GB/s =   0.4% of floor (1.2 us)  ->    0.32 ms/step
+   mv_NK   eager=   799.9 graph=   807.1 us      1.2 GB/s =   0.1% of floor (1.2 us)  ->    0.81 ms/step
+   mulsum  eager=    21.7 graph=    24.8 us     39.6 GB/s =   4.8% of floor (1.2 us)  ->    0.02 ms/step
+
+sweep192         K=5120   N=192     x1  /step  weight=1.97 MB/rank
+   mm_KN   eager=   429.3 graph=   438.9 us      4.5 GB/s =   0.5% of floor (2.4 us)  ->    0.44 ms/step
+   mm_NK   eager=   311.5 graph=   321.5 us      6.1 GB/s =   0.7% of floor (2.4 us)  ->    0.32 ms/step
+   mv_NK   eager=   799.6 graph=   808.4 us      2.4 GB/s =   0.3% of floor (2.4 us)  ->    0.81 ms/step
+   mulsum  eager=    33.5 graph=    35.6 us     55.2 GB/s =   6.7% of floor (2.4 us)  ->    0.04 ms/step
+
+sweep512         K=5120   N=512     x1  /step  weight=5.24 MB/rank
+   mm_KN   eager=   431.5 graph=   441.1 us     11.9 GB/s =   1.4% of floor (6.4 us)  ->    0.44 ms/step
+   mm_NK   eager=   328.3 graph=   341.2 us     15.4 GB/s =   1.9% of floor (6.4 us)  ->    0.34 ms/step
+   mv_NK   eager=   801.7 graph=   810.0 us      6.5 GB/s =   0.8% of floor (6.4 us)  ->    0.81 ms/step
+   mulsum  eager=    65.6 graph=    47.9 us    109.5 GB/s =  13.3% of floor (6.4 us)  ->    0.05 ms/step
+
+sweep2048        K=5120   N=2048    x1  /step  weight=20.97 MB/rank
+   mm_KN   eager=   429.1 graph=   445.0 us     47.1 GB/s =   5.7% of floor (25.5 us)  ->    0.45 ms/step
+   mm_NK   eager=   353.1 graph=   361.6 us     58.0 GB/s =   7.1% of floor (25.5 us)  ->    0.36 ms/step
+   mv_NK   eager=   805.5 graph=   817.0 us     25.7 GB/s =   3.1% of floor (25.5 us)  ->    0.82 ms/step
+   mulsum  eager=   117.4 graph=   124.9 us    167.9 GB/s =  20.4% of floor (25.5 us)  ->    0.12 ms/step
+
+sweep8192        K=5120   N=8192    x1  /step  weight=83.89 MB/rank
+   mm_KN   eager=   432.7 graph=   441.9 us    189.8 GB/s =  23.1% of floor (102.2 us)  ->    0.44 ms/step
+   mm_NK   eager=  1547.5 graph=  1559.4 us     53.8 GB/s =   6.6% of floor (102.2 us)  ->    1.56 ms/step
+   mv_NK   eager=  1552.4 graph=  1561.3 us     53.7 GB/s =   6.5% of floor (102.2 us)  ->    1.56 ms/step
+   mulsum  eager=   390.5 graph=   400.1 us    209.6 GB/s =  25.5% of floor (102.2 us)  ->    0.40 ms/step
+
+wrote /work/p0/p0_dense.json
+trace said 48/step @ 318 us and 1/step @ 6982 us. A form that reaches the floor on the same operands is a drop-in; the gap between mm_KN and the best form is time that can be reclaimed without touching W4A16.

@@ -1,0 +1,156 @@
+=== PATH B start 2026-09-08T08:16:02+08:00
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.rocm_gfx906
+#1 transferring dockerfile: 12.05kB done
+#1 DONE 0.0s
+
+#2 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#2 DONE 9.0s
+
+#3 docker-image://docker.io/docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
+#3 resolve docker.io/docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32 0.0s done
+#3 CACHED
+
+#4 [internal] load metadata for docker.io/rocm/dev-ubuntu-24.04:7.2.4-complete
+#4 DONE 6.9s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 2B done
+#5 DONE 0.0s
+
+#6 [rebuild  1/17] FROM docker.io/rocm/dev-ubuntu-24.04:7.2.4-complete@sha256:92f309c51b52cef8762867848f1529dee821624f23cd5df38455e819538f762f
+#6 resolve docker.io/rocm/dev-ubuntu-24.04:7.2.4-complete@sha256:92f309c51b52cef8762867848f1529dee821624f23cd5df38455e819538f762f 0.0s done
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 159.60MB 0.7s done
+#7 DONE 0.7s
+
+#8 [rebuild  6/17] RUN cd /usr/local/lib/python3.12/dist-packages/torch/lib     && ln -sf librccl.so.1.0 librccl.so.1     && ln -sf librccl.so.1 librccl.so
+#8 CACHED
+
+#9 [rebuild  2/17] RUN apt-get update && apt-get install -y --no-install-recommends         ca-certificates curl libnuma-dev gnupg         sudo libelf1 kmod file python3-dev python3-pip         rocm-dev rocm-libs build-essential         git cmake     && apt-get clean && rm -rf /var/lib/apt/lists/*
+#9 CACHED
+
+#10 [rebuild  3/17] COPY dist-packages.tar.gz /tmp/dist-packages.tar.gz
+#10 CACHED
+
+#11 [rebuild  4/17] RUN tar -xzf /tmp/dist-packages.tar.gz -C / && rm -f /tmp/dist-packages.tar.gz
+#11 CACHED
+
+#12 [rebuild  5/17] COPY rccl/librccl.so.1.0 /usr/local/lib/python3.12/dist-packages/torch/lib/librccl.so.1.0
+#12 CACHED
+
+#13 [rebuild  7/17] COPY supplements/ /usr/local/lib/python3.12/dist-packages/torch/lib/rocblas/library/
+#13 CACHED
+
+#14 [rebuild  8/17] COPY patches/wna16_exllama.py /usr/local/lib/python3.12/dist-packages/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py
+#14 DONE 0.1s
+
+#15 [rebuild  9/17] COPY patches/linear__init__.py /usr/local/lib/python3.12/dist-packages/vllm/model_executor/kernels/linear/__init__.py
+#15 DONE 0.0s
+
+#16 [rebuild 10/17] COPY patches/triton_decode_attention.py /usr/local/lib/python3.12/dist-packages/vllm/v1/attention/ops/triton_decode_attention.py
+#16 DONE 0.0s
+
+#17 [rebuild 11/17] COPY patches/layers_utils.py /usr/local/lib/python3.12/dist-packages/vllm/model_executor/layers/utils.py
+#17 DONE 0.0s
+
+#18 [rebuild 12/17] COPY patches/gfx906_gemv_fix.py /usr/local/lib/python3.12/dist-packages/gfx906_gemv_fix.py
+#18 DONE 0.0s
+
+#19 [rebuild 13/17] COPY patches/gfx906_gemv_fix.pth /usr/local/lib/python3.12/dist-packages/gfx906_gemv_fix.pth
+#19 DONE 0.0s
+
+#20 [rebuild 14/17] COPY entrypoint/ /opt/gfx906/
+#20 DONE 0.0s
+
+#21 [rebuild 15/17] RUN chmod 755 /opt/gfx906/serve.sh /opt/gfx906/selfcheck.sh     && ln -sf /opt/gfx906/serve.sh /usr/local/bin/gfx906-serve     && ln -sf /opt/gfx906/selfcheck.sh /usr/local/bin/gfx906-selfcheck
+#21 DONE 0.2s
+
+#22 [rebuild 16/17] RUN test -f /usr/local/lib/python3.12/dist-packages/torch/lib/librccl.so.1.0     && test -L /usr/local/lib/python3.12/dist-packages/torch/lib/librccl.so     && ls /usr/local/lib/python3.12/dist-packages/torch/lib/rocblas/library/ | grep -q gfx906     && test -f /usr/local/lib/python3.12/dist-packages/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py     && grep -q WNA16ExllamaKernel /usr/local/lib/python3.12/dist-packages/vllm/model_executor/kernels/linear/__init__.py     && grep -q gptq_gemm_out /usr/local/lib/python3.12/dist-packages/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py     && grep -q "is_gfx906" /usr/local/lib/python3.12/dist-packages/vllm/v1/attention/ops/triton_decode_attention.py     && grep -q use_gfx906_gemv /usr/local/lib/python3.12/dist-packages/vllm/model_executor/layers/utils.py     && test -f /usr/local/lib/python3.12/dist-packages/gfx906_gemv_fix.py && test -f /usr/local/lib/python3.12/dist-packages/gfx906_gemv_fix.pth     && grep -aq gptq_gemm_out /usr/local/lib/python3.12/dist-packages/vllm/_C_stable_libtorch.abi3.so     && test -x /opt/gfx906/serve.sh && test -L /usr/local/bin/gfx906-serve     && test -f /opt/gfx906/QUICKSTART.md     && python3 -c "from importlib.metadata import version as v; print('torch', v('torch'), '| vllm', v('vllm'))"
+#22 2.200 torch 2.13.0+rocm7.2 | vllm 0.28.0+rocm724
+#22 DONE 2.6s
+
+#23 [rebuild 17/17] RUN test -z "$(ls -A /root/.cache 2>/dev/null)"     || { echo 'leak: /root/.cache is not empty in the delivery image'; ls -A /root/.cache; exit 1; }
+#23 DONE 0.1s
+
+#24 exporting to image
+#24 exporting layers
+#24 exporting layers 0.4s done
+#24 exporting manifest sha256:712349ca7e4d1b949aad620cc1fb9f72806530b335d407314d234258ffef364f done
+#24 exporting config sha256:067ddae16b5c36c017b07706e88f1c2ebe52b8f39c0be682e2d329b18e74deec done
+#24 exporting attestation manifest sha256:f554b7f0338626573206c8a93967f083cd9d1517e876a152fe12f8a518b6822c 0.0s done
+#24 exporting manifest list sha256:0236cb2971065ae1939ffa4ee0fd68ea165c9edf5374d694d73cd4e646688649 done
+#24 naming to docker.io/library/vllm-gfx906:rebuilt done
+#24 unpacking to docker.io/library/vllm-gfx906:rebuilt 0.1s done
+#24 DONE 0.6s
+=== PATH B OK 2026-09-08T08:16:23+08:00
+=== PATH A start 2026-09-08T08:16:23+08:00
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.rocm_gfx906
+#1 transferring dockerfile: 12.05kB done
+#1 DONE 0.0s
+
+#2 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#2 DONE 0.6s
+
+#3 docker-image://docker.io/docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
+#3 resolve docker.io/docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32 0.0s done
+#3 CACHED
+
+#4 [internal] load metadata for docker.io/library/vllm-gfx906:rebuilt
+#4 DONE 142.2s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 2B done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 20.88kB done
+#6 DONE 0.0s
+
+#7 [final 1/7] FROM docker.io/library/vllm-gfx906:rebuilt@sha256:0236cb2971065ae1939ffa4ee0fd68ea165c9edf5374d694d73cd4e646688649
+#7 resolve docker.io/library/vllm-gfx906:rebuilt@sha256:0236cb2971065ae1939ffa4ee0fd68ea165c9edf5374d694d73cd4e646688649 0.0s done
+#7 DONE 0.1s
+
+#8 [final 2/7] COPY patches/layers_utils.py /usr/local/lib/python3.12/dist-packages/vllm/model_executor/layers/utils.py
+#8 DONE 0.0s
+
+#9 [final 3/7] COPY entrypoint/ /opt/gfx906/
+#9 DONE 0.0s
+
+#10 [final 4/7] RUN chmod 755 /opt/gfx906/serve.sh /opt/gfx906/selfcheck.sh     && ln -sf /opt/gfx906/serve.sh /usr/local/bin/gfx906-serve     && ln -sf /opt/gfx906/selfcheck.sh /usr/local/bin/gfx906-selfcheck
+#10 DONE 0.1s
+
+#11 [final 5/7] RUN test -f /usr/local/lib/python3.12/dist-packages/torch/lib/librccl.so.1.0     && test -L /usr/local/lib/python3.12/dist-packages/torch/lib/librccl.so     && ls /usr/local/lib/python3.12/dist-packages/torch/lib/rocblas/library/ | grep -q gfx906     && test -f /usr/local/lib/python3.12/dist-packages/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py     && grep -q WNA16ExllamaKernel /usr/local/lib/python3.12/dist-packages/vllm/model_executor/kernels/linear/__init__.py     && grep -q gptq_gemm_out /usr/local/lib/python3.12/dist-packages/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py     && grep -q "is_gfx906" /usr/local/lib/python3.12/dist-packages/vllm/v1/attention/ops/triton_decode_attention.py     && grep -q use_gfx906_gemv /usr/local/lib/python3.12/dist-packages/vllm/model_executor/layers/utils.py     && test -f /usr/local/lib/python3.12/dist-packages/gfx906_gemv_fix.py && test -f /usr/local/lib/python3.12/dist-packages/gfx906_gemv_fix.pth     && grep -aq gptq_gemm_out /usr/local/lib/python3.12/dist-packages/vllm/_C_stable_libtorch.abi3.so     && test -x /opt/gfx906/serve.sh && test -L /usr/local/bin/gfx906-serve     && test -f /opt/gfx906/QUICKSTART.md     && python3 -c "from importlib.metadata import version as v; print('torch', v('torch'), '| vllm', v('vllm'))"
+#11 1.456 torch 2.13.0+rocm7.2 | vllm 0.28.0+rocm724
+#11 DONE 1.8s
+
+#12 [final 6/7] RUN test -z "$(ls -A /root/.cache 2>/dev/null)"     || { echo 'leak: /root/.cache is not empty in the delivery image'; ls -A /root/.cache; exit 1; }
+#12 DONE 0.2s
+
+#13 [final 7/7] WORKDIR /work
+#13 DONE 0.0s
+
+#14 exporting to image
+#14 exporting layers
+#14 exporting layers 0.2s done
+#14 exporting manifest sha256:9a782c7024bf67bb96fc029c718773efb6e9fe97f159a71963543617c402640a done
+#14 exporting config sha256:54f5c14afcac41c3f3c8a782a35758213e6659dc0fa395ade70862ef5f3c3b73 done
+#14 exporting attestation manifest sha256:abb3056c49ef5785dc362aaedf07a000c1c69eccd6f699c1f6a1df20ae3f425b 0.0s done
+#14 exporting manifest list sha256:a43d33b25658d4dd8d99c7db42b17adf476188a3a0b6efe10168f126922ab955 done
+#14 naming to docker.io/library/vllm-gfx906:latest done
+#14 unpacking to docker.io/library/vllm-gfx906:latest 0.1s done
+#14 DONE 0.4s
+=== PATH A OK 2026-09-08T08:18:49+08:00
+=== images
+latest|a43d33b25658|2026-09-08 08:18:48 +0800 CST|69.8GB
+rebuilt|0236cb297106|2026-09-08 08:16:22 +0800 CST|69.8GB
+c1-entrypoint-working|5ed9714ba001|2026-09-02 15:41:54 +0800 CST|83.1GB
+b4-gemvfix-working|87174256d1e7|2026-09-02 12:12:52 +0800 CST|79.7GB
+b3-graph-working|a452a3014aed|2026-09-02 08:35:54 +0800 CST|79GB
+phase3-working|a58d56882826|2026-08-31 22:45:56 +0800 CST|78GB
+=== BOTH-OK 2026-09-08T08:18:49+08:00

@@ -1,0 +1,71 @@
+config: layers=None hidden=None vocab=None heads=None kv_heads=None ffn=None num_exp=None
+quant: algo=compressed-tensors bits=None group=None symmetric=None dynamic=None
+quant ignore list: 303 patterns, e.g. ['model.visual.blocks.0.attn.qkv', 'model.visual.blocks.0.attn.proj', 'model.visual.blocks.0.mlp.linear_fc1', 'model.visual.blocks.0.mlp.linear_fc2', 'model.visual.blocks.1.attn.qkv', 'model.visual.blocks.1.attn.proj']
+
+== quantized (packed) weight shapes ==
+   x128  (17408, 640)             I32
+   x128  (17408, 40)              BF16
+   x64   (5120, 768)              I32
+   x64   (5120, 2176)             I32
+   x64   (5120, 48)               BF16
+   x64   (5120, 136)              BF16
+   x48   (10240, 640)             I32
+   x48   (6144, 640)              I32
+   x48   (10240, 40)              BF16
+   x48   (6144, 40)               BF16
+   x32   (1024, 640)              I32
+   x32   (1024, 40)               BF16
+   x16   (12288, 640)             I32
+   x16   (12288, 40)              BF16
+
+== plain fp16/fp32 2-D weights that a decode step multiplies ==
+   x96   (48, 5120)         -> per-rank K=48 N=2560  BF16  1 MB total  IGNORED(kept fp16)
+        model.language_model.layers.0.linear_attn.in_proj_a.weight
+        model.language_model.layers.0.linear_attn.in_proj_b.weight
+        model.language_model.layers.1.linear_attn.in_proj_a.weight
+        model.language_model.layers.1.linear_attn.in_proj_b.weight
+   x27   (1152, 1152)       -> per-rank K=1152 N=576  BF16  5 MB total  IGNORED(kept fp16)
+        model.visual.blocks.0.attn.proj.weight
+        model.visual.blocks.1.attn.proj.weight
+        model.visual.blocks.10.attn.proj.weight
+        model.visual.blocks.11.attn.proj.weight
+   x27   (3456, 1152)       -> per-rank K=3456 N=576  BF16  16 MB total  IGNORED(kept fp16)
+        model.visual.blocks.0.attn.qkv.weight
+        model.visual.blocks.1.attn.qkv.weight
+        model.visual.blocks.10.attn.qkv.weight
+        model.visual.blocks.11.attn.qkv.weight
+   x27   (4304, 1152)       -> per-rank K=4304 N=576  BF16  20 MB total  IGNORED(kept fp16)
+        model.visual.blocks.0.mlp.linear_fc1.weight
+        model.visual.blocks.1.mlp.linear_fc1.weight
+        model.visual.blocks.10.mlp.linear_fc1.weight
+        model.visual.blocks.11.mlp.linear_fc1.weight
+   x27   (1152, 4304)       -> per-rank K=1152 N=2152  BF16  20 MB total  IGNORED(kept fp16)
+        model.visual.blocks.0.mlp.linear_fc2.weight
+        model.visual.blocks.1.mlp.linear_fc2.weight
+        model.visual.blocks.10.mlp.linear_fc2.weight
+        model.visual.blocks.11.mlp.linear_fc2.weight
+   x2    (248320, 5120)     -> per-rank K=248320 N=2560  BF16  5086 MB total  IGNORED(kept fp16)
+        lm_head.weight
+        model.language_model.embed_tokens.weight
+   x2    (17408, 5120)      -> per-rank K=17408 N=2560  BF16  357 MB total  
+        mtp.layers.0.mlp.gate_proj.weight
+        mtp.layers.0.mlp.up_proj.weight
+   x2    (1024, 5120)       -> per-rank K=1024 N=2560  BF16  21 MB total  
+        mtp.layers.0.self_attn.k_proj.weight
+        mtp.layers.0.self_attn.v_proj.weight
+   x1    (4608, 4608)       -> per-rank K=4608 N=2304  BF16  85 MB total  IGNORED(kept fp16)
+        model.visual.merger.linear_fc1.weight
+   x1    (5120, 4608)       -> per-rank K=5120 N=2304  BF16  94 MB total  IGNORED(kept fp16)
+        model.visual.merger.linear_fc2.weight
+   x1    (2304, 1152)       -> per-rank K=2304 N=576  BF16  11 MB total  
+        model.visual.pos_embed.weight
+   x1    (5120, 10240)      -> per-rank K=5120 N=5120  BF16  210 MB total  
+        mtp.fc.weight
+   x1    (5120, 17408)      -> per-rank K=5120 N=8704  BF16  357 MB total  
+        mtp.layers.0.mlp.down_proj.weight
+   x1    (5120, 6144)       -> per-rank K=5120 N=3072  BF16  126 MB total  
+        mtp.layers.0.self_attn.o_proj.weight
+   x1    (12288, 5120)      -> per-rank K=12288 N=2560  BF16  252 MB total  
+        mtp.layers.0.self_attn.q_proj.weight
+
+compare against the trace: the dense_fp16 bucket had 48 launches/step and 1 launch/step kernels; a module replicated across every layer of one type (48 GDN or 64 all) is the 48/step one, a once-per-step module (lm_head) is the 1/step one.

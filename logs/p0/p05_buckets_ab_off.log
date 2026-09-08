@@ -1,0 +1,28 @@
+wall: 53.66 ms/decode-step = 18.6 tok/s (unprofiled, 256-token request, pin=1425.0MHz, capture_sizes=[1, 2, 4, 8, 16, 24, 32, 48])
+window (primary rank 0): K = 64 decode steps, span 4977.1 ms, 82176 device events = 1284 kernel-launches/step
+  rank 0: sum 3502.3 ms  union 3501.8 ms  span 4977.1 ms  worst gap 10.1 ms
+    WARN unseen device category UNSEEN-CATEGORY:Trace x1
+  rank 1: sum 4641.7 ms  union 4640.9 ms  span 4977.1 ms  worst gap 9.4 ms
+    WARN unseen device category UNSEEN-CATEGORY:Trace x1
+
+The window is taken under the torch profiler, which adds rank skew, so a profiled decode step runs 77.8 ms while the delivery step is 53.7 ms. All the extra is peer-wait: the compute rows below are profiler-independent and are the same per-step work in both. %wall uses the delivery step (what tok/s depends on); %win uses the profiled step (what the GPU was doing).
+
+bucket          us/step    %wall     %win  launches
+dense_fp16      22207.2    41.4%    28.6%      3136
+w4a16_gemv      19823.8    36.9%    25.5%     16384
+rccl_wait        7237.7    13.5%     9.3%      8320
+elementwise      4035.8     7.5%     5.2%     43456
+gdn               768.0     1.4%     1.0%      6144
+attention         515.4     1.0%     0.7%      3072
+memcpy            127.6     0.2%     0.2%      1600
+UNCLASSIFIED        7.5     0.0%
+         7.5 us/step  x64     _compute_slot_mapping_kernel.kd
+
+GPU occupied 0.70 of the profiled window (union/span, rank 0), but a third of that occupancy is nccl spin-wait.
+ROUTING NUMBER: compute-only busy = 47.5 ms kernel work / 53.66 ms delivery step = 0.88
+  rccl_wait in this window = 7237.7 us/step, i.e. 9% of the profiled step's slack; at delivery the step leaves only 6.2 ms for wait+bubbles, so the skew is profiler-induced, not a cross-rank/PCIe finding.
+W4A16 GEMV = 19824 us/step = 36.9% of the delivery step = 41.8% of compute
+dense fp16 GEMMs individually (launches/step identifies the owner):
+       15260 us/step   48.0 launches/step  Cijk_Alik_Bljk_HHS_BH_MT32x32x16_SE_1LDSB0_APM1_ABV0_ACED0_AF0EM2_AF1EM1_AMAS3
+        6947 us/step    1.0 launches/step  Cijk_Alik_Bljk_HHS_BH_MT64x16x16_SE_1LDSB0_APM1_ABV0_ACED0_AF0EM2_AF1EM1_AMAS3
+spec 1(c): <0.6 -> not a kernel problem | 0.6-0.8 mixed | >=0.8 kernel suspects (GEMV / attention / GDN)

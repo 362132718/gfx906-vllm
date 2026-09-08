@@ -1,0 +1,207 @@
+# syntax=docker/dockerfile:1
+# ============================================================================
+# vLLM 0.28.0 gfx906 (Radeon Pro VII / MI50, GCN 5.1, wave64) — frozen env
+# ============================================================================
+# Verified working state (2026-08-31, host 192.168.10.11, 2x gfx906 TP2):
+#   vllm      0.28.0+rocm724   (built from /work/vllm-official, tag v0.28.0)
+#   torch     2.13.0+rocm7.2   (hip 7.2.53211)
+#   triton    3.8.0            (built from /work/triton.tar.gz source)
+#   torchvision 0.28.0+rocm7.2, transformers 5.16.1
+#   Model test: Qwen3.8-27B-OBLITERATED-AWQ-W4A16, TP2, TRITON_ATTN,
+#               W4A16 ExLlama kernel. As of 2026-09-01 (B3): FULL_DECODE_ONLY
+#               CUDA graphs work via the capture-safe gptq_gemm_out op --
+#               batch1 21.9 tok/s, batch8 70.0 tok/s, deterministic greedy,
+#               char-identical to the eager baseline. Current snapshot:
+#               vllm-gfx906:b3-graph-working
+#
+# gfx906 customizations baked into this environment:
+#   0. vLLM C++ (csrc/libtorch_stable): new gptq_gemm_out op (caller-owned
+#      output slab + lazy temp_dq; the fused kernel accumulates via atomicAdd
+#      so the bridge must zero_() the buffer first) + gptq_gemm allocates
+#      temp_dq only for the reconstruct path. Requires building vllm from the
+#      patched source tree (repo /work/vllm-official carries the diff).
+#   1. torch/lib/librccl.so*     -> RCCL 2.27.7 rebuilt WITH gfx906 kernels
+#                                   (stock ROCm 7.2.4 librccl has none and
+#                                   segfaults at nccl init). Symlink chain:
+#                                   librccl.so -> librccl.so.1 -> librccl.so.1.0
+#                                   Stock lib kept as librccl.so.official-backup
+#   2. torch/lib/rocblas/library -> 156 Tensile gfx906 supplement files
+#                                   (hsaco/co/dat). NOTE: torch's own rocblas
+#                                   library dir is what matters; /opt/rocm's
+#                                   copy does not need them.
+#   3. vllm patches:
+#      - model_executor/kernels/linear/mixed_precision/wna16_exllama.py
+#        (compressed-tensors W4A16 -> ops.gptq_gemm(use_exllama=True) bridge,
+#        with gptq_shuffle nibble interleave + empty g_idx permutation)
+#      - model_executor/kernels/linear/__init__.py (kernel registration)
+#      - v1/attention/ops/triton_decode_attention.py (BLOCK=32 on gfx906)
+#      - model_executor/layers/utils.py (P0.5: M=1 dense GEMV -> skinny LLGemm1)
+#
+# ---------------------------------------------------------------------------
+# TWO BUILD PATHS  (Path B first; Path A is layered on its output)
+# ---------------------------------------------------------------------------
+# Path B (authoritative, offline rebuild from the official ROCm base). Requires
+#   build-context/ produced by prepare_build_context.sh: dist-packages.tar.gz,
+#   rccl/librccl.so.1.0, supplements/ (156 files), patches/, entrypoint/:
+#     docker build -f Dockerfile.rocm_gfx906 --target rebuild \
+#                  -t vllm-gfx906:rebuilt build-context/
+#
+# Path A (default target): seconds of layering on :rebuilt, for a change that
+#   only touches files this stage re-COPYs (patched python, entry points):
+#     docker build -f Dockerfile.rocm_gfx906 -t vllm-gfx906:latest .
+#
+# Path A's base is deliberately NOT a `docker commit` of the dev container.
+# Those carry ~16 GB of /root/.cache (9.7G pip, 3.6G vLLM compile cache, 1.8 GB
+# of AOT W4A16 caches keyed without the kernel selection, so one mode's cache
+# breaks another). :phase3-working was such a commit AND predates B3/B4/C1, so
+# it fails this recipe's own assertions; :c1-entrypoint-working passes them but
+# still leaks the caches. Start from the clean recipe-built image instead, and
+# the final stage asserts /root/.cache is empty so a swapped-in base can't slip.
+#
+# WARNING: docker commit PAUSES the container by default and this hangs forever
+# on this host (frozen process + /dev/kfd). Always use --no-pause.
+# ============================================================================
+
+ARG BASE_IMAGE=rocm/dev-ubuntu-24.04:7.2.4-complete
+# Path A's base = Path B's output. See "TWO BUILD PATHS" above for why it is not
+# a `docker commit` of the dev container.
+ARG SNAPSHOT_IMAGE=vllm-gfx906:rebuilt
+ARG SP=/usr/local/lib/python3.12/dist-packages
+
+# ----------------------------------------------------------------------------
+# Path B: offline rebuild from the official ROCm base image.
+# Requires build-context/: dist-packages.tar.gz, rccl/librccl.so.1.0,
+# supplements/ (156 files), patches/, entrypoint/ -- all extracted from the
+# working container by prepare_build_context.sh.
+# ----------------------------------------------------------------------------
+FROM ${BASE_IMAGE} AS rebuild
+ARG SP
+ENV DEBIAN_FRONTEND=noninteractive
+
+# System packages, exactly as installed in the working container
+# (see BUILD_GUIDE.md "apt history").
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates curl libnuma-dev gnupg \
+        sudo libelf1 kmod file python3-dev python3-pip \
+        rocm-dev rocm-libs build-essential \
+        git cmake \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Whole python environment: torch/triton/torchvision/transformers/vllm
+# (+dist-info, entrypoints in /usr/local/bin). ~18G extracted.
+COPY dist-packages.tar.gz /tmp/dist-packages.tar.gz
+RUN tar -xzf /tmp/dist-packages.tar.gz -C / && rm -f /tmp/dist-packages.tar.gz
+
+# gfx906 RCCL into torch/lib (idempotent overwrite of whatever the tar held)
+COPY rccl/librccl.so.1.0 ${SP}/torch/lib/librccl.so.1.0
+RUN cd ${SP}/torch/lib \
+    && ln -sf librccl.so.1.0 librccl.so.1 \
+    && ln -sf librccl.so.1 librccl.so
+
+# Tensile gfx906 supplements into torch's rocblas library dir
+COPY supplements/ ${SP}/torch/lib/rocblas/library/
+
+# Patched vLLM files
+COPY patches/wna16_exllama.py ${SP}/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py
+COPY patches/linear__init__.py ${SP}/vllm/model_executor/kernels/linear/__init__.py
+COPY patches/triton_decode_attention.py ${SP}/vllm/v1/attention/ops/triton_decode_attention.py
+# P0.5: gfx906 M=1 dense fp16 GEMM -> ROCm skinny LLGemm1_kernel. Tensile answers
+# those with a serial K loop (22 207 us/step); the skinny kernel does the same 49
+# launches in 1 707 us, i.e. lm_head at 866 GB/s = 93% of this card's measured
+# BW_eff. Decode step 53.66 -> 33.01 ms (18.6 -> 30.3 tok/s), greedy-identical.
+COPY patches/layers_utils.py ${SP}/vllm/model_executor/layers/utils.py
+
+# gfx906 rocBLAS GEMV workaround (fp32/fp64 matrix*vector segfault).
+# Auto-activates via .pth; NOT sitecustomize.py -- Ubuntu ships its own
+# /usr/lib/python3.12/sitecustomize.py that shadows ours on sys.path.
+COPY patches/gfx906_gemv_fix.py ${SP}/gfx906_gemv_fix.py
+COPY patches/gfx906_gemv_fix.pth ${SP}/gfx906_gemv_fix.pth
+
+# Delivery entry points: gfx906-serve (verified flag defaults) +
+# gfx906-selfcheck + QUICKSTART.md, symlinked onto PATH.
+COPY entrypoint/ /opt/gfx906/
+RUN chmod 755 /opt/gfx906/serve.sh /opt/gfx906/selfcheck.sh \
+    && ln -sf /opt/gfx906/serve.sh /usr/local/bin/gfx906-serve \
+    && ln -sf /opt/gfx906/selfcheck.sh /usr/local/bin/gfx906-selfcheck
+
+# Static sanity checks (no GPU needed): every gfx906-critical artifact exists.
+RUN test -f ${SP}/torch/lib/librccl.so.1.0 \
+    && test -L ${SP}/torch/lib/librccl.so \
+    && ls ${SP}/torch/lib/rocblas/library/ | grep -q gfx906 \
+    && test -f ${SP}/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py \
+    && grep -q WNA16ExllamaKernel ${SP}/vllm/model_executor/kernels/linear/__init__.py \
+    && grep -q gptq_gemm_out ${SP}/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py \
+    && grep -q "is_gfx906" ${SP}/vllm/v1/attention/ops/triton_decode_attention.py \
+    && grep -q use_gfx906_gemv ${SP}/vllm/model_executor/layers/utils.py \
+    && test -f ${SP}/gfx906_gemv_fix.py && test -f ${SP}/gfx906_gemv_fix.pth \
+    && grep -aq gptq_gemm_out ${SP}/vllm/_C_stable_libtorch.abi3.so \
+    && test -x /opt/gfx906/serve.sh && test -L /usr/local/bin/gfx906-serve \
+    && test -f /opt/gfx906/QUICKSTART.md \
+    && python3 -c "from importlib.metadata import version as v; print('torch', v('torch'), '| vllm', v('vllm'))"
+
+# Same runtime contract as Path A's final stage. Kept last so that editing the
+# list doesn't invalidate the 18G extraction layer above.
+ENV HSA_OVERRIDE_GFX_VERSION=9.0.6 \
+    VLLM_TRITON_ATTN_NUM_SEGMENTS=64 \
+    VLLM_WNA16_EXLLAMA=1 \
+    PYTORCH_ROCM_ARCH=gfx906 \
+    VLLM_TARGET_DEVICE=rocm
+
+# A delivery image must not carry accumulated compile caches: they are ~600MB
+# per W4A16 kernel mode, only save ~5 minutes on the first start of a NEW
+# container, and a cache built under one kernel mode crashes another (vLLM's
+# compile-cache key omits the kernel selection).
+RUN test -z "$(ls -A /root/.cache 2>/dev/null)" \
+    || { echo 'leak: /root/.cache is not empty in the delivery image'; ls -A /root/.cache; exit 1; }
+
+# ----------------------------------------------------------------------------
+# Path A (default target): the committed snapshot already contains all of the
+# above; this stage only re-asserts the runtime contract and labels.
+# ----------------------------------------------------------------------------
+FROM ${SNAPSHOT_IMAGE} AS final
+ARG SP
+LABEL org.opencontainers.image.title="vllm-gfx906" \
+      org.opencontainers.image.description="vLLM 0.28.0 + torch 2.13.0+rocm7.2 + triton 3.8.0, gfx906 RCCL/Tensile/ExLlama patches, verified 2026-08-31"
+
+# Runtime environment (mirrors the verified `docker run -e` flags)
+ENV HSA_OVERRIDE_GFX_VERSION=9.0.6 \
+    VLLM_TRITON_ATTN_NUM_SEGMENTS=64 \
+    VLLM_WNA16_EXLLAMA=1 \
+    PYTORCH_ROCM_ARCH=gfx906 \
+    VLLM_TARGET_DEVICE=rocm
+
+# P0.5 dispatch patch. The base's other python files arrived via build-context/,
+# i.e. only as fresh as the last prepare_build_context.sh run; this one is
+# re-COPYed from the repo, so :latest is correct by construction.
+COPY patches/layers_utils.py ${SP}/vllm/model_executor/layers/utils.py
+
+# Re-assert the delivery entry points on top of the snapshot (idempotent; the
+# snapshot already carries them, this keeps :latest correct if they changed).
+COPY entrypoint/ /opt/gfx906/
+RUN chmod 755 /opt/gfx906/serve.sh /opt/gfx906/selfcheck.sh \
+    && ln -sf /opt/gfx906/serve.sh /usr/local/bin/gfx906-serve \
+    && ln -sf /opt/gfx906/selfcheck.sh /usr/local/bin/gfx906-selfcheck
+
+# Static sanity checks (no GPU needed): every gfx906-critical artifact exists.
+RUN test -f ${SP}/torch/lib/librccl.so.1.0 \
+    && test -L ${SP}/torch/lib/librccl.so \
+    && ls ${SP}/torch/lib/rocblas/library/ | grep -q gfx906 \
+    && test -f ${SP}/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py \
+    && grep -q WNA16ExllamaKernel ${SP}/vllm/model_executor/kernels/linear/__init__.py \
+    && grep -q gptq_gemm_out ${SP}/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py \
+    && grep -q "is_gfx906" ${SP}/vllm/v1/attention/ops/triton_decode_attention.py \
+    && grep -q use_gfx906_gemv ${SP}/vllm/model_executor/layers/utils.py \
+    && test -f ${SP}/gfx906_gemv_fix.py && test -f ${SP}/gfx906_gemv_fix.pth \
+    && grep -aq gptq_gemm_out ${SP}/vllm/_C_stable_libtorch.abi3.so \
+    && test -x /opt/gfx906/serve.sh && test -L /usr/local/bin/gfx906-serve \
+    && test -f /opt/gfx906/QUICKSTART.md \
+    && python3 -c "from importlib.metadata import version as v; print('torch', v('torch'), '| vllm', v('vllm'))"
+
+# Same delivery contract as Path B's guard above: Path A inherits the base's
+# filesystem, so an accidental `--build-arg SNAPSHOT_IMAGE=<dev commit>` would
+# otherwise ship its ~16 GB of compile caches.
+RUN test -z "$(ls -A /root/.cache 2>/dev/null)" \
+    || { echo 'leak: /root/.cache is not empty in the delivery image'; ls -A /root/.cache; exit 1; }
+
+WORKDIR /work
+CMD ["/bin/bash"]
