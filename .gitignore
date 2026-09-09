@@ -1,9 +1,10 @@
 # Measurement output and hardware dumps are evidence, not source.
 *.log
 blackbox_*.log
-# ...except the curated P0 / P0.5 evidence files, which the reports cite.
+# ...except the curated P0 / P0.5 / P1 evidence files, which the reports cite.
 !p0_*.log
 !p05_*.log
+!p1_*.log
 
 # Regenerable / huge build inputs, rebuilt by docker/prepare_build_context.sh.
 build-context/

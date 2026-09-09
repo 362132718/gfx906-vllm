@@ -1,0 +1,33 @@
+L0a K=512 N=256 words=16384 mismatched_words=0
+L0a PASS (scales (4, 256) dtype torch.float16)
+L0a K=512 N=256 words=16384 mismatched_words=0
+L0a PASS (scales (4, 256) dtype torch.float16)
+L0b qzeros packed=(4, 32) unpacked=(4, 256)
+L0b positions=32 max_rel=4.880e-04 worst=(0, 86)
+L0b PASS
+L0a K=5120 N=7168 words=4587520 mismatched_words=0
+L0a PASS (scales (40, 7168) dtype torch.float16)
+L0b qzeros packed=(40, 896) unpacked=(40, 7168)
+L0b positions=32 max_rel=4.880e-04 worst=(0, 86)
+L0b PASS
+L0a K=3072 N=5120 words=1966080 mismatched_words=0
+L0a PASS (scales (24, 5120) dtype torch.float16)
+L0b qzeros packed=(24, 640) unpacked=(24, 5120)
+L0b positions=32 max_rel=4.880e-04 worst=(0, 86)
+L0b PASS
+L0a K=5120 N=17408 words=11141120 mismatched_words=0
+L0a PASS (scales (40, 17408) dtype torch.float16)
+L0b qzeros packed=(40, 2176) unpacked=(40, 17408)
+L0b positions=32 max_rel=4.880e-04 worst=(0, 3110)
+L0b PASS
+L0a K=8704 N=5120 words=5570560 mismatched_words=0
+L0a PASS (scales (68, 5120) dtype torch.float16)
+L0b qzeros packed=(68, 640) unpacked=(68, 5120)
+L0b positions=32 max_rel=4.880e-04 worst=(0, 86)
+L0b PASS
+L0a K=5120 N=8192 words=5242880 mismatched_words=0
+L0a PASS (scales (40, 8192) dtype torch.float16)
+L0b qzeros packed=(40, 1024) unpacked=(40, 8192)
+L0b positions=32 max_rel=4.880e-04 worst=(0, 86)
+L0b PASS
+L0 ALL PASS

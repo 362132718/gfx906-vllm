@@ -1,0 +1,4 @@
+=== per-symbol ISA counts (whole symbol; loop split noted per variant) ===
+p1_gemv(at::Tensor, at::Tensor, at::Tens valu=0     dot2=0    mem=0     VGPR=-1  SGPR=-1 
+
+=== op/weight (upper bound, whole symbol / 8 weights per int32 word) ===

@@ -1,0 +1,49 @@
+{
+ "bw_pure_read_gb_s": 813.8371899683655,
+ "bw_read_write_gb_s": 1300.3940396110183,
+ "bw_floor_ref": 821.0,
+ "bw_read_ref": 928.0,
+ "sum_floor_us_per_token": 7764.831686108663,
+ "shapes": {
+  "5120,7168": {
+   "pulled_bytes": 19066880,
+   "qw_bytes": 18350080,
+   "meta_bytes": 716800,
+   "splitk": 2,
+   "floor_us": 23.428371466707173,
+   "calls_per_token": 16
+  },
+  "3072,5120": {
+   "pulled_bytes": 8171520,
+   "qw_bytes": 7864320,
+   "meta_bytes": 307200,
+   "splitk": 4,
+   "floor_us": 10.040730628588788,
+   "calls_per_token": 64
+  },
+  "5120,17408": {
+   "pulled_bytes": 46305280,
+   "qw_bytes": 44564480,
+   "meta_bytes": 1740800,
+   "splitk": 1,
+   "floor_us": 56.897473562003135,
+   "calls_per_token": 64
+  },
+  "8704,5120": {
+   "pulled_bytes": 23152640,
+   "qw_bytes": 22282240,
+   "meta_bytes": 870400,
+   "splitk": 4,
+   "floor_us": 28.448736781001568,
+   "calls_per_token": 64
+  },
+  "5120,8192": {
+   "pulled_bytes": 21790720,
+   "qw_bytes": 20971520,
+   "meta_bytes": 819200,
+   "splitk": 2,
+   "floor_us": 26.775281676236773,
+   "calls_per_token": 48
+  }
+ }
+}

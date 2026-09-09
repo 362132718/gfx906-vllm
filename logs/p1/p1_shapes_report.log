@@ -1,0 +1,13 @@
+rank csv files: 3
+  /work/p1/p1_shapes.csv.4349 rows=0
+  /work/p1/p1_shapes.csv.4405 rows=16896
+  /work/p1/p1_shapes.csv.4406 rows=16896
+distinct (K,N) observed = 5   design table has 5
+  K=3072   N=5120   csv_rows=8448  m_values=[1, 12, 256, 8192]  128|K=True  8|N=True  attn o_proj + GDN out_proj
+  K=5120   N=7168   csv_rows=2112  m_values=[1, 12, 256, 8192]  128|K=True  8|N=True  attn qkv_proj
+  K=5120   N=8192   csv_rows=6336  m_values=[1, 12, 256, 8192]  128|K=True  8|N=True  GDN in_proj_qkvz
+  K=5120   N=17408  csv_rows=8448  m_values=[1, 12, 256, 8192]  128|K=True  8|N=True  mlp gate_up_proj
+  K=8704   N=5120   csv_rows=8448  m_values=[1, 12, 256, 8192]  128|K=True  8|N=True  mlp down_proj
+extra=-
+missing=-
+SHAPE-GATE PASS

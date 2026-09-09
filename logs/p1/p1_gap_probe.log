@@ -1,0 +1,68 @@
+[92mSuccessfully preprocessed all matching files.[0m
+W0909 00:32:27.183000 5964 torch/utils/cpp_extension.py:2778] The environment variable `PYTORCH_ROCM_ARCH` is not set, all archs for visible cards are included for compilation (gfx906).
+W0909 00:32:27.183000 5964 torch/utils/cpp_extension.py:2778] If this is not desired, please set the environment variable `PYTORCH_ROCM_ARCH` to specific architectures.
+=== [1] load-only probe vs qweight-only floor ===
+loadonly K=3072   N=5120   best=28.92 us vs qw-floor=9.66 us => 33.4% of floor
+loadonly K=5120   N=17408  best=74.30 us vs qw-floor=54.76 us => 73.7% of floor
+loadonly K=5120   N=7168   best=42.06 us vs qw-floor=22.55 us => 53.6% of floor
+loadonly K=5120   N=8192   best=42.90 us vs qw-floor=25.77 us => 60.1% of floor
+loadonly K=8704   N=5120   best=60.76 us vs qw-floor=27.38 us => 45.1% of floor
+=== [2] incumbent WITH rotation (the old baseline was single-buffer) ===
+incumbent-rot K=3072   N=5120   eager=33.54 graph=41.50 us (single-buffer was 40.75)
+incumbent-rot K=5120   N=17408  eager=82.89 graph=90.93 us (single-buffer was 89.26)
+incumbent-rot K=5120   N=7168   eager=66.35 graph=74.14 us (single-buffer was 74.07)
+incumbent-rot K=5120   N=8192   eager=70.84 graph=78.99 us (single-buffer was 80.05)
+incumbent-rot K=8704   N=5120   eager=108.19 graph=116.19 us (single-buffer was 117.96)
+=== [3] V3 with unroll {1,2} on the losing families ===
+CHECK variant=3 splitk=2 unroll=1 K=5120 N=17408 wiring=1.22e-04(ok) randx_rel=9.54e-04(ok) OK
+V3 K=5120   N=17408  sk=2 u=1 graph=199.96 us (28.5% of floor)
+CHECK variant=3 splitk=2 unroll=2 K=5120 N=17408 wiring=1.22e-04(ok) randx_rel=1.07e-03(ok) OK
+V3 K=5120   N=17408  sk=2 u=2 graph=200.13 us (28.4% of floor)
+CHECK variant=3 splitk=2 unroll=4 K=5120 N=17408 wiring=1.22e-04(ok) randx_rel=9.43e-04(ok) OK
+V3 K=5120   N=17408  sk=2 u=4 graph=200.40 us (28.4% of floor)
+CHECK variant=3 splitk=4 unroll=1 K=5120 N=17408 wiring=1.22e-04(ok) randx_rel=8.89e-04(ok) OK
+V3 K=5120   N=17408  sk=4 u=1 graph=118.13 us (48.2% of floor)
+CHECK variant=3 splitk=4 unroll=2 K=5120 N=17408 wiring=1.22e-04(ok) randx_rel=8.76e-04(ok) OK
+V3 K=5120   N=17408  sk=4 u=2 graph=118.13 us (48.2% of floor)
+CHECK variant=3 splitk=4 unroll=4 K=5120 N=17408 wiring=1.22e-04(ok) randx_rel=1.43e-03(ok) OK
+V3 K=5120   N=17408  sk=4 u=4 graph=118.09 us (48.2% of floor)
+CHECK variant=3 splitk=8 unroll=1 K=5120 N=17408 wiring=1.22e-04(ok) randx_rel=9.54e-04(ok) OK
+V3 K=5120   N=17408  sk=8 u=1 graph=115.53 us (49.3% of floor)
+CHECK variant=3 splitk=8 unroll=2 K=5120 N=17408 wiring=1.22e-04(ok) randx_rel=8.94e-04(ok) OK
+V3 K=5120   N=17408  sk=8 u=2 graph=115.50 us (49.3% of floor)
+CHECK variant=3 splitk=8 unroll=4 K=5120 N=17408 wiring=1.22e-04(ok) randx_rel=9.37e-04(ok) OK
+V3 K=5120   N=17408  sk=8 u=4 graph=115.49 us (49.3% of floor)
+CHECK variant=3 splitk=2 unroll=1 K=8704 N=5120 wiring=1.22e-04(ok) randx_rel=9.76e-04(ok) OK
+V3 K=8704   N=5120   sk=2 u=1 graph=315.74 us (9.0% of floor)
+CHECK variant=3 splitk=2 unroll=2 K=8704 N=5120 wiring=1.22e-04(ok) randx_rel=9.34e-04(ok) OK
+V3 K=8704   N=5120   sk=2 u=2 graph=315.58 us (9.0% of floor)
+CHECK variant=3 splitk=2 unroll=4 K=8704 N=5120 wiring=1.22e-04(ok) randx_rel=1.80e-03(ok) OK
+V3 K=8704   N=5120   sk=2 u=4 graph=315.56 us (9.0% of floor)
+CHECK variant=3 splitk=4 unroll=1 K=8704 N=5120 wiring=1.22e-04(ok) randx_rel=9.64e-04(ok) OK
+V3 K=8704   N=5120   sk=4 u=1 graph=168.96 us (16.8% of floor)
+CHECK variant=3 splitk=4 unroll=2 K=8704 N=5120 wiring=1.22e-04(ok) randx_rel=9.54e-04(ok) OK
+V3 K=8704   N=5120   sk=4 u=2 graph=168.83 us (16.9% of floor)
+CHECK variant=3 splitk=4 unroll=4 K=8704 N=5120 wiring=1.22e-04(ok) randx_rel=8.55e-04(ok) OK
+V3 K=8704   N=5120   sk=4 u=4 graph=169.00 us (16.8% of floor)
+CHECK variant=3 splitk=2 unroll=1 K=3072 N=5120 wiring=1.22e-04(ok) randx_rel=8.05e-04(ok) OK
+V3 K=3072   N=5120   sk=2 u=1 graph=120.83 us (8.3% of floor)
+CHECK variant=3 splitk=2 unroll=2 K=3072 N=5120 wiring=1.22e-04(ok) randx_rel=9.03e-04(ok) OK
+V3 K=3072   N=5120   sk=2 u=2 graph=121.01 us (8.3% of floor)
+CHECK variant=3 splitk=2 unroll=4 K=3072 N=5120 wiring=1.22e-04(ok) randx_rel=9.62e-04(ok) OK
+V3 K=3072   N=5120   sk=2 u=4 graph=120.98 us (8.3% of floor)
+CHECK variant=3 splitk=4 unroll=1 K=3072 N=5120 wiring=1.22e-04(ok) randx_rel=8.03e-04(ok) OK
+V3 K=3072   N=5120   sk=4 u=1 graph=69.41 us (14.5% of floor)
+CHECK variant=3 splitk=4 unroll=2 K=3072 N=5120 wiring=1.22e-04(ok) randx_rel=7.15e-04(ok) OK
+V3 K=3072   N=5120   sk=4 u=2 graph=69.52 us (14.4% of floor)
+CHECK variant=3 splitk=4 unroll=4 K=3072 N=5120 wiring=1.22e-04(ok) randx_rel=8.18e-04(ok) OK
+V3 K=3072   N=5120   sk=4 u=4 graph=69.47 us (14.5% of floor)
+CHECK variant=3 splitk=8 unroll=1 K=3072 N=5120 wiring=1.22e-04(ok) randx_rel=9.33e-04(ok) OK
+V3 K=3072   N=5120   sk=8 u=1 graph=44.44 us (22.6% of floor)
+CHECK variant=3 splitk=8 unroll=2 K=3072 N=5120 wiring=1.22e-04(ok) randx_rel=6.43e-04(ok) OK
+V3 K=3072   N=5120   sk=8 u=2 graph=44.38 us (22.6% of floor)
+CHECK variant=3 splitk=8 unroll=4 K=3072 N=5120 wiring=1.22e-04(ok) randx_rel=7.66e-04(ok) OK
+V3 K=3072   N=5120   sk=8 u=4 graph=44.40 us (22.6% of floor)
+=== [4] VGPR/SGPR per kernel (llvm-readelf notes) ===
+(no amdhsa vgpr metadata found; first 200 chars:) 
+GAP-PROBE-DONE
+GAPDONE
