@@ -1,0 +1,20 @@
+== K=5120 N=8192 M=1  p2_part=True _cbuf=0x7e028faa0000 ==
+   [1] apply_weights x6 (env unset)       runs=6 n_diff_vs_0=[0, 0, 0, 0, 0] max|d|=['0.000e+00', '0.000e+00', '0.000e+00', '0.000e+00', '0.000e+00'] ptrs=differ
+   [2] env unset/0/1  n_diff(unset vs 0)=[6353, 6389, 6445]  (0 vs 1)=[6353, 6389, 6445]  hits=3
+   [3] direct op into _cbuf[:M] x4        runs=4 n_diff_vs_0=[6540, 6663, 6639] max|d|=['3.906e-02', '5.469e-02', '4.688e-02'] ptrs=differ
+   [4] direct op into fresh zeros x4      runs=4 n_diff_vs_0=[6624, 6594, 6625] max|d|=['4.688e-02', '4.102e-02', '4.688e-02'] ptrs=differ
+   [5] direct op, slab + fresh tdq x4     runs=4 n_diff_vs_0=[6588, 6696, 6650] max|d|=['4.688e-02', '3.906e-02', '3.906e-02'] ptrs=differ
+== K=5120 N=8192 M=2  p2_part=True _cbuf=0x7e0234ca0000 ==
+   [1] apply_weights x6 (env unset)       runs=6 n_diff_vs_0=[12561, 12421, 12411, 12456, 12575] max|d|=['4.688e-02', '4.688e-02', '4.688e-02', '3.906e-02', '4.688e-02'] ptrs=differ
+   [2] env unset/0/1  n_diff(unset vs 0)=[12303, 12385, 12195]  (0 vs 1)=[12161, 12246, 12266]  hits=0
+   [3] direct op into _cbuf[:M] x4        runs=4 n_diff_vs_0=[12328, 12343, 12105] max|d|=['4.688e-02', '4.688e-02', '3.516e-02'] ptrs=differ
+   [4] direct op into fresh zeros x4      runs=4 n_diff_vs_0=[12177, 12443, 12300] max|d|=['4.688e-02', '4.688e-02', '3.906e-02'] ptrs=differ
+   [5] direct op, slab + fresh tdq x4     runs=4 n_diff_vs_0=[12377, 12292, 12235] max|d|=['5.469e-02', '4.688e-02', '6.250e-02'] ptrs=differ
+== K=5120 N=17408 M=1  p2_part=False _cbuf=0x7e0286494000 ==
+   [1] apply_weights x6 (env unset)       runs=6 n_diff_vs_0=[12242, 12213, 12313, 12514, 12213] max|d|=['3.125e-02', '3.125e-02', '3.125e-02', '4.688e-02', '3.125e-02'] ptrs=differ
+   [2] env unset/0/1  n_diff(unset vs 0)=[12232, 12279, 12405]  (0 vs 1)=[12208, 12187, 11889]  hits=0
+   [3] direct op into _cbuf[:M] x4        runs=4 n_diff_vs_0=[12459, 11983, 12287] max|d|=['3.125e-02', '3.125e-02', '3.125e-02'] ptrs=differ
+   [4] direct op into fresh zeros x4      runs=4 n_diff_vs_0=[12083, 12216, 12422] max|d|=['3.906e-02', '3.906e-02', '4.688e-02'] ptrs=differ
+   [5] direct op, slab + fresh tdq x4     runs=4 n_diff_vs_0=[12399, 12631, 12473] max|d|=['3.125e-02', '3.906e-02', '3.906e-02'] ptrs=differ
+DISCRIM-DONE
+EXIT=0

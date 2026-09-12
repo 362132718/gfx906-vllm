@@ -1,0 +1,16 @@
+=== T6 START 2026-09-10T05:07:18+08:00
+unlocked /sys/class/drm/card0/device
+/sys/class/drm/card0/device level=auto sclk=860Mhz  mclk=350Mhz 
+unlocked /sys/class/drm/card1/device
+/sys/class/drm/card1/device level=auto sclk=860Mhz  mclk=350Mhz 
+--- clocks now:
+/sys/class/drm/card0/device level=auto sclk=860Mhz  mclk=350Mhz 
+/sys/class/drm/card1/device level=auto sclk=860Mhz  mclk=350Mhz 
+--- reusing p2-t6 (image matches)
+--- container: sha256:e806793fd238ff0f150bf2a01c0a8108fbf3c31f1eb93a15a757541ee3f9475d running
+=== arm=on SKIP (already measured): REQ2_WARM: 33.3 tok/s DECODE256 best=33.5 mean=33.5 
+=== arm=off p2=-e VLLM_WNA16_P2_GEMV=0 2026-09-10T05:07:18+08:00
+env in this exec: VLLM_WNA16_P2_GEMV=0
+preflight_vram_free_minGB=17.142120448
+cache: 542M(/root/.cache/vllm-w4a16-exllama) 
+--- try 1/3 log=/home/x/vllm-work/p2t6/serve_off_try1.log 2026-09-09T21:07:20+00:00

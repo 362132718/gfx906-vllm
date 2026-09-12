@@ -32,10 +32,14 @@
 #   3. vllm patches:
 #      - model_executor/kernels/linear/mixed_precision/wna16_exllama.py
 #        (compressed-tensors W4A16 -> ops.gptq_gemm(use_exllama=True) bridge,
-#        with gptq_shuffle nibble interleave + empty g_idx permutation)
+#        with gptq_shuffle nibble interleave + empty g_idx permutation; P2 adds an
+#        M=1 custom-op route for two whitelisted shapes)
 #      - model_executor/kernels/linear/__init__.py (kernel registration)
 #      - v1/attention/ops/triton_decode_attention.py (BLOCK=32 on gfx906)
 #      - model_executor/layers/utils.py (P0.5: M=1 dense GEMV -> skinny LLGemm1)
+#   4. gfx906/libp2gemv.so (P2: hand-written wave64 W4A16 GEMV, split-K=10, built
+#      from patches/p2_w4a16_gemv.hip at image build time; loaded over ctypes by
+#      wna16_exllama.py and optional -- if the .so is absent dispatch falls back)
 #
 # ---------------------------------------------------------------------------
 # TWO BUILD PATHS  (Path B first; Path A is layered on its output)
@@ -117,6 +121,20 @@ COPY patches/layers_utils.py ${SP}/vllm/model_executor/layers/utils.py
 COPY patches/gfx906_gemv_fix.py ${SP}/gfx906_gemv_fix.py
 COPY patches/gfx906_gemv_fix.pth ${SP}/gfx906_gemv_fix.pth
 
+# P2: gfx906 M=1 W4A16 GEMV for the whitelisted (5120,8192)/(5120,7168) shapes.
+# Compiled here instead of extracted from the tarball: the dev container carries a
+# hand-built copy for the gate runs, and that would ride in on dist-packages.tar.gz
+# with no guarantee it came from this source. rm -rf first, so the shipped .so is
+# always a build of patches/p2_w4a16_gemv.hip.
+COPY patches/p2_w4a16_gemv.hip /tmp/p2_w4a16_gemv.hip
+RUN rm -rf ${SP}/gfx906 && mkdir -p ${SP}/gfx906 && \
+    hipcc -shared -fPIC --offload-arch=gfx906 -O3 /tmp/p2_w4a16_gemv.hip \
+      -o ${SP}/gfx906/libp2gemv.so && rm -f /tmp/p2_w4a16_gemv.hip && \
+    nm -D --defined-only ${SP}/gfx906/libp2gemv.so | grep -qw p2_gemv
+# -w is load-bearing: without extern "C" the mangled _Z14p2_gemv_kernel... and
+# _Z29__device_stub__p2_gemv_kernel... still contain the substring, so a plain
+# `grep -q p2_gemv` passes on a .so whose ctypes lookup would fail (container-verified).
+
 # Delivery entry points: gfx906-serve (verified flag defaults) +
 # gfx906-selfcheck + QUICKSTART.md, symlinked onto PATH.
 COPY entrypoint/ /opt/gfx906/
@@ -131,8 +149,14 @@ RUN test -f ${SP}/torch/lib/librccl.so.1.0 \
     && test -f ${SP}/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py \
     && grep -q WNA16ExllamaKernel ${SP}/vllm/model_executor/kernels/linear/__init__.py \
     && grep -q gptq_gemm_out ${SP}/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py \
-    && grep -q "is_gfx906" ${SP}/vllm/v1/attention/ops/triton_decode_attention.py \
+    && grep -q "on_gfx906" ${SP}/vllm/v1/attention/ops/triton_decode_attention.py \
+    && ! grep -q "is_gfx906" ${SP}/vllm/v1/attention/ops/triton_decode_attention.py \
     && grep -q use_gfx906_gemv ${SP}/vllm/model_executor/layers/utils.py \
+    && grep -q "acc = (x_view \* weight).sum" ${SP}/vllm/model_executor/layers/utils.py \
+    && test -f "${SP}/vllm/model_executor/layers/fused_moe/configs/E=256,N=256,device_name=AMD_Radeon_Pro_VII,dtype=int4_w4a16.json" \
+    && test -s ${SP}/gfx906/libp2gemv.so \
+    && nm -D --defined-only ${SP}/gfx906/libp2gemv.so | grep -qw p2_gemv \
+    && grep -q _P2_SHAPES ${SP}/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py \
     && test -f ${SP}/gfx906_gemv_fix.py && test -f ${SP}/gfx906_gemv_fix.pth \
     && grep -aq gptq_gemm_out ${SP}/vllm/_C_stable_libtorch.abi3.so \
     && test -x /opt/gfx906/serve.sh && test -L /usr/local/bin/gfx906-serve \
@@ -175,6 +199,13 @@ ENV HSA_OVERRIDE_GFX_VERSION=9.0.6 \
 # re-COPYed from the repo, so :latest is correct by construction.
 COPY patches/layers_utils.py ${SP}/vllm/model_executor/layers/utils.py
 
+# P2's GEMV .so is not re-COPYed here: Path A inherits it from :rebuilt, which
+# compiled it from patches/p2_w4a16_gemv.hip, and the sanity chain below re-asserts
+# it. Compile caches are a different matter -- the base may carry ones baked for
+# another model / parallelism / graph config, and vLLM's cache key does not cover
+# the W4A16 kernel choice, so one mode's cache breaks another's.
+RUN rm -rf /root/.cache/vllm /root/.cache/vllm-w4a16-*
+
 # Re-assert the delivery entry points on top of the snapshot (idempotent; the
 # snapshot already carries them, this keeps :latest correct if they changed).
 COPY entrypoint/ /opt/gfx906/
@@ -189,8 +220,14 @@ RUN test -f ${SP}/torch/lib/librccl.so.1.0 \
     && test -f ${SP}/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py \
     && grep -q WNA16ExllamaKernel ${SP}/vllm/model_executor/kernels/linear/__init__.py \
     && grep -q gptq_gemm_out ${SP}/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py \
-    && grep -q "is_gfx906" ${SP}/vllm/v1/attention/ops/triton_decode_attention.py \
+    && grep -q "on_gfx906" ${SP}/vllm/v1/attention/ops/triton_decode_attention.py \
+    && ! grep -q "is_gfx906" ${SP}/vllm/v1/attention/ops/triton_decode_attention.py \
     && grep -q use_gfx906_gemv ${SP}/vllm/model_executor/layers/utils.py \
+    && grep -q "acc = (x_view \* weight).sum" ${SP}/vllm/model_executor/layers/utils.py \
+    && test -f "${SP}/vllm/model_executor/layers/fused_moe/configs/E=256,N=256,device_name=AMD_Radeon_Pro_VII,dtype=int4_w4a16.json" \
+    && test -s ${SP}/gfx906/libp2gemv.so \
+    && nm -D --defined-only ${SP}/gfx906/libp2gemv.so | grep -qw p2_gemv \
+    && grep -q _P2_SHAPES ${SP}/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py \
     && test -f ${SP}/gfx906_gemv_fix.py && test -f ${SP}/gfx906_gemv_fix.pth \
     && grep -aq gptq_gemm_out ${SP}/vllm/_C_stable_libtorch.abi3.so \
     && test -x /opt/gfx906/serve.sh && test -L /usr/local/bin/gfx906-serve \

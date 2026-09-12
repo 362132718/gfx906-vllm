@@ -1,0 +1,6 @@
+REQ1: 9.1 tok/s
+REQ2_WARM: 33.3 tok/s
+DECODE256 rep1: 33.5 tok/s
+DECODE256 rep2: 33.4 tok/s
+DECODE256 rep3: 33.5 tok/s
+DECODE256 best=33.5 mean=33.5

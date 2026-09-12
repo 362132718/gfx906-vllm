@@ -1,0 +1,23 @@
+_P2_OK=True route-op=True
+[1] traced `x.shape[0] == 1` traced@130 called@1 -> True
+    NOTE: dynamo did NOT fold it here -- arm [3] is then the only thing that can explain G-P3, read it carefully
+--- regime: specialize_int=True ---
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1446: UserWarning: vllm::p2_w4a16_gemm (with implementation in ???): The output of this custom operator (1) must not also be an input to this custom operator and (2) may not alias any inputs to this custom operator or other returns. The most common way to trigger this error is if we have y = custom_op(x) and y and x are the same Tensor. Please instead return a clone of the offending output tensor(s) (e.g. return x.clone()) or refactor the custom operator to not return y. This is deprecated and will become an error in a future version of PyTorch.
+  return fn(*args, **kwargs)
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1446: UserWarning: vllm::p2_gemv_or_fused (with implementation in ???): The output of this custom operator (1) must not also be an input to this custom operator and (2) may not alias any inputs to this custom operator or other returns. The most common way to trigger this error is if we have y = custom_op(x) and y and x are the same Tensor. Please instead return a clone of the offending output tensor(s) (e.g. return x.clone()) or refactor the custom operator to not return y. This is deprecated and will become an error in a future version of PyTorch.
+  return fn(*args, **kwargs)
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1446: UserWarning: vllm::p2_gemv_or_fused (with implementation in ???): The output of this custom operator (1) must not also be an input to this custom operator and (2) may not alias any inputs to this custom operator or other returns. The most common way to trigger this error is if we have y = custom_op(x) and y and x are the same Tensor. Please instead return a clone of the offending output tensor(s) (e.g. return x.clone()) or refactor the custom operator to not return y. This is deprecated and will become an error in a future version of PyTorch.
+  return fn(*args, **kwargs)
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1446: UserWarning: vllm::p2_gemv_or_fused (with implementation in ???): The output of this custom operator (1) must not also be an input to this custom operator and (2) may not alias any inputs to this custom operator or other returns. The most common way to trigger this error is if we have y = custom_op(x) and y and x are the same Tensor. Please instead return a clone of the offending output tensor(s) (e.g. return x.clone()) or refactor the custom operator to not return y. This is deprecated and will become an error in a future version of PyTorch.
+  return fn(*args, **kwargs)
+   [2] OLD route: eager@M=1 fired=True | compiled traced@130: M=1 fired=True M=8 fired=False
+      -> traced-region shape test DOES survive it
+   [3] NEW route: eager@M=1 fired=True | compiled traced@130: M=1 fired=True M=8 fired=False
+      compiled@M=1 == eager@M=1 bit-for-bit: True (n_diff=0 max=0.0e+00)
+--- regime: specialize_int=False ---
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1446: UserWarning: vllm::p2_w4a16_gemm (with implementation in ???): The output of this custom operator (1) must not also be an input to this custom operator and (2) may not alias any inputs to this custom operator or other returns. The most common way to trigger this error is if we have y = custom_op(x) and y and x are the same Tensor. Please instead return a clone of the offending output tensor(s) (e.g. return x.clone()) or refactor the custom operator to not return y. This is deprecated and will become an error in a future version of PyTorch.
+  return fn(*args, **kwargs)
+   [2] OLD route: eager@M=1 fired=True | compiled traced@130: M=1 fired=True M=8 fired=False
+      -> traced-region shape test DOES survive it
+   [3] NEW route: eager@M=1 fired=True | compiled traced@130: M=1 fired=True M=8 fired=False
+      compiled@M=1 == eager@M=1 bit-for-bit: True (n_diff=0 max=0.0e+00)

@@ -827,12 +827,25 @@ class QwenGatedDeltaNetAttention(GatedDeltaNetAttention):
         The RMSNormGated + quant sequence is eligible for fusion
         by the compilation pass when fuse_norm_quant is enabled.
         """
-        z_shape_og = z.shape
-        core_attn_out = core_attn_out.reshape(-1, core_attn_out.shape[-1])
-        z = z.reshape(-1, z.shape[-1])
-        core_attn_out = self.norm(core_attn_out, z)
-        core_attn_out = core_attn_out.reshape(z_shape_og)
-        core_attn_out = core_attn_out.flatten(-2)  # ... h d -> ... (h d)
+        if os.environ.get("VLLM_GFX906_GDN_OUTPUT_NORM") == "1":
+            # gfx906 A/B, default OFF. Ported in mechanism (not code) from
+            # David-Lzy/vllm-gfx906 `_output_projection`: keep the
+            # [tokens, heads, head_dim] layout through RMSNormGated and flatten
+            # once for out_proj, instead of flattening to 2D and letting the
+            # CustomOp dispatch select a kernel. RMSNormGated is a CustomOp with
+            # forward_native() present, so this needs no recompile.
+            # Their doc records small positive kernel results but neutral or
+            # negative model-level results; enable only after an engine-level
+            # A/B on our model (greedy token-id equality + tok/s).
+            core_attn_out = self.norm.forward_native(core_attn_out, z)
+            core_attn_out = core_attn_out.flatten(-2)  # ... h d -> ... (h d)
+        else:
+            z_shape_og = z.shape
+            core_attn_out = core_attn_out.reshape(-1, core_attn_out.shape[-1])
+            z = z.reshape(-1, z.shape[-1])
+            core_attn_out = self.norm(core_attn_out, z)
+            core_attn_out = core_attn_out.reshape(z_shape_og)
+            core_attn_out = core_attn_out.flatten(-2)  # ... h d -> ... (h d)
         output, _ = self.out_proj(core_attn_out)
         return output
 

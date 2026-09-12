@@ -1,0 +1,22 @@
+[92mSuccessfully preprocessed all matching files.[0m
+W0909 13:18:07.138000 8126 torch/utils/cpp_extension.py:2778] The environment variable `PYTORCH_ROCM_ARCH` is not set, all archs for visible cards are included for compilation (gfx906).
+W0909 13:18:07.138000 8126 torch/utils/cpp_extension.py:2778] If this is not desired, please set the environment variable `PYTORCH_ROCM_ARCH` to specific architectures.
+P2 production gate (G-P1): sk=10 lib=lazy
+== K=5120 N=8192  Task0 ref graph=60.53us ulp_rms=0.0292 ==
+   [1] wiring  worst=1.22e-04 (gate <=5e-04) ok
+   [2] fp64    RMS=0.0292 MEAN=0.0009 MAX=1 (gate <=0.05, Task0 0.0292, <=2x) ok
+   [3] graph   eager=51.99 graph=60.46 us vs Task0 60.53 (-0.1%, tol 20%) | replay rewrote poison=True replay_bitstable=True ok
+   [4] vs proto sk=10 u=8 bit-equal=True n_diff=0 max_dist=0.000 ULP
+   temps={'card0': 44, 'card1': 41} clocks=card0 8: 1700Mhz * 2: 1000Mhz * | card1 8: 1700Mhz * 2: 1000Mhz *
+== K=5120 N=7168  Task0 ref graph=58.22us ulp_rms=0.0205 ==
+   [1] wiring  worst=1.22e-04 (gate <=5e-04) ok
+   [2] fp64    RMS=0.0205 MEAN=0.0004 MAX=1 (gate <=0.05, Task0 0.0205, <=2x) ok
+   [3] graph   eager=49.56 graph=58.12 us vs Task0 58.22 (-0.2%, tol 20%) | replay rewrote poison=True replay_bitstable=True ok
+   [4] vs proto sk=10 u=8 bit-equal=True n_diff=0 max_dist=0.000 ULP
+   temps={'card0': 44, 'card1': 41} clocks=card0 8: 1700Mhz * 2: 1000Mhz * | card1 8: 1700Mhz * 2: 1000Mhz *
+
+=== G-P1 VERDICT ===
+K=5120 N=8192 -> PASS (bit_equal=True)
+K=5120 N=7168 -> PASS (bit_equal=True)
+G-P1 PASS
+PROD-GATE-DONE

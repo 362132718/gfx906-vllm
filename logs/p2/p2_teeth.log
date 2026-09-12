@@ -1,0 +1,95 @@
+=========== M1 w_s<->w_zp swapped in the impl ===========
+P2 route gate (G-P2): _P2_OK=True lib=True splitk=10 shapes=[(5120, 7168), (5120, 8192)] seed=7
+== row A probe ==
+Memory access fault by GPU node-1 (Agent handle: 0x49517a80) on address 0x788e3903c000. Reason: Page not present or supervisor privilege.
+GPU coredump: execvp failed: No such file or directory
+Failed to write segment data to pipe: Bad address
+GPU coredump: handler exited with error (status: 1)
+GPU core dump failed
+---
+=========== M2 whitelist membership dropped ===========
+P2 route gate (G-P2): _P2_OK=True lib=True splitk=10 shapes=[(5120, 7168), (5120, 8192)] seed=7
+== row A probe ==
+   probe _P2_OK                       ok   loader found p2_gemv
+   op registered                      ok   torch.ops.vllm.p2_w4a16_gemm
+   part allocated 5120/8192           ok   (10, 8192)
+   part allocated 5120/7168           ok   (10, 7168)
+   part skipped 5120/17408            BAD  (10, 17408)
+   part skipped 5120/8704             BAD  (10, 8704)
+   part skipped 5120/3072             BAD  (10, 3072)
+== row B op==ctypes ==
+   op==ctypes bit-equal 5120/8192     ok   equal=True n_diff=0 max=0.0e+00 hits=1 last=(5120, 8192)
+   P2 bit-stable x4 5120/8192         ok   n_diff=[0, 0, 0, 0]
+   op==ctypes bit-equal 5120/7168     ok   equal=True n_diff=0 max=0.0e+00 hits=1 last=(5120, 7168)
+   P2 bit-stable x4 5120/7168         ok   n_diff=[0, 0, 0, 0]
+== row C M=2 ==
+   M=2 no P2 hit                      ok   hits=0
+   M=2 in incumbent band              ok   max|d|=4.688e-02 <= tol=9.375e-02 (sigma_inc=4.297e-02, tol=6.0 ULP@|max|=21.8)
+   M=2 == gptq_gemm_out               ok   n_diff=12359 max|d|=3.906e-02 <= tol=9.375e-02
+== row D off-list ==
+   5120/17408 off-list skipped        BAD  part=True hits=1
+   5120/17408 unchanged vs off        ok   n_diff=13457/17408 max|d|=3.906e-02 <= tol=9.375e-02 (sigma_inc=3.906e-02)
+   5120/8704 off-list skipped         BAD  part=True hits=1
+   5120/8704 unchanged vs off         ok   n_diff=6788/8704 max|d|=4.688e-02 <= tol=9.375e-02 (sigma_inc=3.906e-02)
+   5120/3072 off-list skipped         BAD  part=True hits=1
+   5120/3072 unchanged vs off         ok   n_diff=2357/3072 max|d|=3.125e-02 <= tol=9.375e-02 (sigma_inc=4.688e-02)
+== row E kill-switch ==
+   kill-switch: no hits               ok   off=0 default=1 on=2
+   switch changes kernel              ok   n_diff=6361/8192 max|d|=4.688e-02
+   switch output finite               ok   
+== row F predicate ==
+   five shapes hit-count exact        BAD  want={(5120, 8192): 1, (5120, 7168): 1, (5120, 17408): 0, (5120, 8704): 0, (5120, 3072): 0} got={(5120, 8192): 1, (5120, 7168): 1, (5120, 17408): 1, (5120, 8704): 1, (5120, 3072): 1}
+== row G capture ==
+   capture 5120/8192                  ok   replay_stable=True rewrote_poison=True ==eager=True hits_in_capture=2 aliases_slab=True
+   capture 5120/7168                  ok   replay_stable=True rewrote_poison=True ==eager=True hits_in_capture=2 aliases_slab=True
+
+ROUTE BAD
+G-P2 FAIL
+ROUTE-GATE-DONE
+---
+=========== M3 out removed from mutates_args ===========
+P2 route gate (G-P2): _P2_OK=True lib=True splitk=10 shapes=[(5120, 7168), (5120, 8192)] seed=7
+== row A probe ==
+   probe _P2_OK                       ok   loader found p2_gemv
+   op registered                      ok   torch.ops.vllm.p2_w4a16_gemm
+   part allocated 5120/8192           ok   (10, 8192)
+   part allocated 5120/7168           ok   (10, 7168)
+   part skipped 5120/17408            ok   None
+   part skipped 5120/8704             ok   None
+   part skipped 5120/3072             ok   None
+== row B op==ctypes ==
+   op==ctypes bit-equal 5120/8192     ok   equal=True n_diff=0 max=0.0e+00 hits=1 last=(5120, 8192)
+   P2 bit-stable x4 5120/8192         ok   n_diff=[0, 0, 0, 0]
+   op==ctypes bit-equal 5120/7168     ok   equal=True n_diff=0 max=0.0e+00 hits=1 last=(5120, 7168)
+   P2 bit-stable x4 5120/7168         ok   n_diff=[0, 0, 0, 0]
+== row C M=2 ==
+   M=2 no P2 hit                      ok   hits=0
+   M=2 in incumbent band              ok   max|d|=3.906e-02 <= tol=9.375e-02 (sigma_inc=4.688e-02, tol=6.0 ULP@|max|=21.7)
+   M=2 == gptq_gemm_out               ok   n_diff=12410 max|d|=4.688e-02 <= tol=9.375e-02
+== row D off-list ==
+   5120/17408 off-list skipped        ok   part=False hits=0
+   5120/17408 unchanged vs off        ok   n_diff=12390/17408 max|d|=3.125e-02 <= tol=9.375e-02 (sigma_inc=4.688e-02)
+   5120/8704 off-list skipped         ok   part=False hits=0
+   5120/8704 unchanged vs off         ok   n_diff=6950/8704 max|d|=4.297e-02 <= tol=9.375e-02 (sigma_inc=4.688e-02)
+   5120/3072 off-list skipped         ok   part=False hits=0
+   5120/3072 unchanged vs off         ok   n_diff=2505/3072 max|d|=3.125e-02 <= tol=9.375e-02 (sigma_inc=3.906e-02)
+== row E kill-switch ==
+   kill-switch: no hits               ok   off=0 default=1 on=2
+   switch changes kernel              ok   n_diff=6387/8192 max|d|=3.516e-02
+   switch output finite               ok   
+== row F predicate ==
+   five shapes hit-count exact        ok   want={(5120, 8192): 1, (5120, 7168): 1, (5120, 17408): 0, (5120, 8704): 0, (5120, 3072): 0} got={(5120, 8192): 1, (5120, 7168): 1, (5120, 17408): 0, (5120, 8704): 0, (5120, 3072): 0}
+== row G capture ==
+   capture 5120/8192                  ok   replay_stable=True rewrote_poison=True ==eager=True hits_in_capture=2 aliases_slab=True
+   capture 5120/7168                  ok   replay_stable=True rewrote_poison=True ==eager=True hits_in_capture=2 aliases_slab=True
+
+ROUTE ok
+G-P2 PASS
+ROUTE-GATE-DONE
+---
+37325e2aa3da0dcdcf3317111e098883  /usr/local/lib/python3.12/dist-packages/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py
+37325e2aa3da0dcdcf3317111e098883  /work/p2/wna16_exllama.py
+SUMMARY M1 w_s<->w_zp swapped in the impl ::   BAD_rows=0  traceback=0
+SUMMARY M2 whitelist membership dropped :: ROUTE BAD G-P2 FAIL ROUTE-GATE-DONE   BAD_rows=8  traceback=0
+SUMMARY M3 out removed from mutates_args :: ROUTE ok G-P2 PASS ROUTE-GATE-DONE   BAD_rows=0  traceback=0
+TEETH-DONE

@@ -206,6 +206,38 @@ def rocm_unquantized_gemm_impl(
     # weight.is_contiguous() (inside skinny_operands_compatible) is load
     # bearing -- LLMM1 ignores strides and silently returns garbage for a
     # transposed view.
+    # A scalar projection (m == 1) is a dot product, not a GEMM. Qwen3-Next and
+    # Qwen3.5-MoE put one per layer -- `shared_expert_gate = Linear(hidden, 1)`
+    # (qwen3_next.py:152) -- and Tensile answers it with an MT64x64x16 tile
+    # running a serial K loop. Measured 151 us for k=2048; x40 layers that is
+    # 6.03 ms/step, 25% of a decode step.
+    #
+    # It never reached P0.5 because it also fails that guard's `m % 4 == 0`
+    # (same reason as the `use_gfx906_gemv` case below: m == 1). There is
+    # nothing to tile here, so do the reduction directly and skip BLAS. fp32
+    # accumulation because the fp16 product of 2048 terms overflows easily.
+    #
+    # DO NOT call tensor methods on `weight` here (no weight.reshape(-1) --
+    # broadcasting against its (1, k) shape is equivalent and is the only form
+    # that survives torch.compile). weight is a BasevLLMParameter, and any
+    # torch function applied to it dispatches through parameter.py's
+    # __torch_function__; under AOT/dynamo tracing that turned into
+    # 'NoneType' object has no attribute 'size' inside torch/_dynamo/utils.py
+    # call_size(), which killed MM=1 (vision on) engine init outright.
+    # Verified by bisect 2026-09-11: branch present -> crash, absent -> OK.
+    if (
+        envs.VLLM_ROCM_USE_SKINNY_GEMM
+        and on_gfx906()
+        and x.dtype in [torch.float16, torch.bfloat16]
+        and bias is None
+        and n == 1
+        and m == 1
+        and skinny_operands_compatible
+    ):
+        x_view = x.reshape(-1, x.size(-1))
+        acc = (x_view * weight).sum(-1, dtype=torch.float32)   # broadcast (1, k)
+        return acc.to(x.dtype).reshape(*x.shape[:-1], weight.shape[0])
+
     use_gfx906_gemv = (
         envs.VLLM_ROCM_USE_SKINNY_GEMM
         and on_gfx906()

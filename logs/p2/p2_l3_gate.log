@@ -1,0 +1,27 @@
+L3: arms off/on, 4 prompt(s), ntok=256
+
+dispatch proof (M==1 branch rounds; off = warm-up only, on = warm-up + capture warm-up + capture): off total=120 over 2 pid(s), on total=380 over 2 pid(s) (want on >= 2*off on >=2 pids each), families={'5120x7168': 94, '5120x8192': 286}
+   per-pid off={'16578': 0, '16693': 0, '16764': 60, '16765': 60} on={'17004': 0, '17119': 0, '17190': 190, '17191': 190}
+   [dispatch] -> PASS
+
+positions compared (forced decode route, both arms): 1015
+cross-arm flips      : 2 (0.20%)  worst min-margin = 0.0469 nats
+noise floor flips    : 4  (off: prefill route vs its own decode route) worst min-margin = 0.0469 nats
+control (cross-arm prefill) flips: 4
+free-run cross-arm flips: 1 over 867 shared positions (157 skipped as post-divergence, per prompt [(0, 157), (1, 0), (2, 0), (3, 0)])
+probe dropped positions (arm left the forced track): [(0, 3, 3), (1, 1, 2), (2, 3, 3), (3, 0, 0)]
+forced-track asymmetry off/on rows, positions kept by one arm only: [(0, 253, 253, 'off_only=[218]', 'on_only=[171]'), (1, 255, 254, 'off_only=[152]', 'on_only=[]'), (2, 253, 253, 'off_only=[]', 'on_only=[]'), (3, 256, 256, 'off_only=[]', 'on_only=[]')]
+   flip p0 pos170   min_margin=0.0469  off=25 on=421
+   flip p2 pos119   min_margin=0.0156  off=318 on=321
+   floor p0 pos93    min_margin=0.0469  prefill=5285 decode=8
+   floor p0 pos219   min_margin=0.0156  prefill=3238 decode=3000
+   floor p2 pos93    min_margin=0.0156  prefill=9 decode=318
+   floor p0 pos170   min_margin=0.0000  prefill=421 decode=25
+top-8 inclusion violations: 0
+free-run divergence off vs on: 1 prompt(s) [(0, 98, 256, 256)]
+
+[cross-margin] M0_swap 0.0469 <= M0_floor 0.0469 -> PASS
+[floor established] yes
+[top-8 inclusion] 0 violations -> PASS
+[dispatch proof] off=120 on=380 -> PASS
+G-P4 L3 PASS

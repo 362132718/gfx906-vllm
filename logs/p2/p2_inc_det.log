@@ -1,0 +1,34 @@
+== K=5120 N=8192 M=1  |ref|max=21.2792 ==
+   fresh vs fresh  eq=False n_diff=  6609/8192  max|a-b|=6.2500e-02 (2.94e-03 of ref)  max_ulpidx=11904  mean_ulpidx=6.120
+   slab vs slab    eq=True  n_diff=     0/8192  max|a-b|=0.0000e+00 (0.00e+00 of ref)  max_ulpidx=0  mean_ulpidx=0.000
+   fresh vs slab   eq=False n_diff=  6580/8192  max|a-b|=4.6875e-02 (2.20e-03 of ref)  max_ulpidx=14720  mean_ulpidx=7.323
+   run a           max|run-ref|=1.1409e+01  mean|run-ref|=2.3833e+00
+   run b           max|run-ref|=1.1407e+01  mean|run-ref|=2.3833e+00
+   slab c          max|run-ref|=1.1407e+01  mean|run-ref|=2.3833e+00
+   slab d          max|run-ref|=1.1407e+01  mean|run-ref|=2.3833e+00
+== K=5120 N=8192 M=2  |ref|max=21.2792 ==
+   fresh vs fresh  eq=False n_diff= 12409/16384  max|a-b|=4.6875e-02 (2.20e-03 of ref)  max_ulpidx=13632  mean_ulpidx=6.969
+   slab vs slab    eq=True  n_diff=     0/16384  max|a-b|=0.0000e+00 (0.00e+00 of ref)  max_ulpidx=0  mean_ulpidx=0.000
+   fresh vs slab   eq=False n_diff= 12462/16384  max|a-b|=5.4688e-02 (2.57e-03 of ref)  max_ulpidx=11264  mean_ulpidx=5.939
+   run a           max|run-ref|=1.5411e+01  mean|run-ref|=3.4091e+00
+   run b           max|run-ref|=1.5395e+01  mean|run-ref|=3.4091e+00
+   slab c          max|run-ref|=1.5395e+01  mean|run-ref|=3.4091e+00
+   slab d          max|run-ref|=1.5395e+01  mean|run-ref|=3.4091e+00
+== K=5120 N=17408 M=1  |ref|max=22.3257 ==
+   fresh vs fresh  eq=False n_diff= 12371/17408  max|a-b|=3.1250e-02 (1.40e-03 of ref)  max_ulpidx=13952  mean_ulpidx=6.048
+   slab vs slab    eq=True  n_diff=     0/17408  max|a-b|=0.0000e+00 (0.00e+00 of ref)  max_ulpidx=0  mean_ulpidx=0.000
+   fresh vs slab   eq=False n_diff= 12347/17408  max|a-b|=3.9062e-02 (1.75e-03 of ref)  max_ulpidx=11520  mean_ulpidx=5.099
+   run a           max|run-ref|=1.2010e+01  mean|run-ref|=2.3505e+00
+   run b           max|run-ref|=1.2002e+01  mean|run-ref|=2.3506e+00
+   slab c          max|run-ref|=1.2010e+01  mean|run-ref|=2.3506e+00
+   slab d          max|run-ref|=1.2010e+01  mean|run-ref|=2.3506e+00
+== K=5120 N=3072 M=1  |ref|max=19.8764 ==
+   fresh vs fresh  eq=False n_diff=  2484/3072  max|a-b|=3.9062e-02 (1.97e-03 of ref)  max_ulpidx=12830  mean_ulpidx=9.703
+   slab vs slab    eq=True  n_diff=     0/3072  max|a-b|=0.0000e+00 (0.00e+00 of ref)  max_ulpidx=0  mean_ulpidx=0.000
+   fresh vs slab   eq=False n_diff=  2490/3072  max|a-b|=3.1250e-02 (1.57e-03 of ref)  max_ulpidx=13952  mean_ulpidx=9.218
+   run a           max|run-ref|=9.9649e+00  mean|run-ref|=2.4207e+00
+   run b           max|run-ref|=9.9493e+00  mean|run-ref|=2.4209e+00
+   slab c          max|run-ref|=9.9649e+00  mean|run-ref|=2.4207e+00
+   slab d          max|run-ref|=9.9649e+00  mean|run-ref|=2.4207e+00
+DET-DONE
+EXIT=0

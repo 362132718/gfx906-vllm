@@ -1,0 +1,32 @@
+== gfx906 image self-check
+-- host visibility
+  [ok]   2 GPU render node(s) + /dev/kfd visible
+-- gfx906 runtime artifacts
+  [ok]   gfx906 RCCL build (torch/lib/librccl.so.1.0)
+  [ok]   RCCL symlink chain librccl.so -> librccl.so.1
+  [ok]   Tensile gfx906 kernels: 156 files
+  [ok]   W4A16 ExLlama bridge registered
+  [ok]   capture-safe gptq_gemm_out (python side)
+  [ok]   capture-safe gptq_gemm_out (compiled op)
+  [ok]   Triton decode attention gfx906 BLOCK=32
+  [ok]   gfx906 M=1 dense GEMV on skinny LLGemm1
+  [ok]   p2 GEMV .so present
+  [ok]   p2 GEMV symbol exported
+  [ok]   p2 dispatch wired
+  [ok]   rocBLAS GEMV fix module
+  [ok]   GEMV fix auto-activation (.pth)
+-- versions
+  torch 2.13.0+rocm7.2     vllm 0.28.0+rocm724 triton 3.8.0
+  [ok]   python env importable
+-- gfx906 runtime env (image ENV; gfx906-serve backstops these too)
+  [ok]   HSA_OVERRIDE_GFX_VERSION=9.0.6
+  [ok]   VLLM_TRITON_ATTN_NUM_SEGMENTS=64
+  [ok]   VLLM_WNA16_EXLLAMA=1
+-- GPU behaviour (torch)
+  [ok]   2 gfx906 device(s): gfx906:sramecc+:xnack-, hip 7.2.53211
+  [ok]   GEMV fix applied (aten::mv/addmv -> GEMM path)
+  [ok]   fp32 mv correct (rel=1.2e-07)
+  [ok]   fp16 matmul finite
+  [ok]   W4A16 graph-capture op exposed
+
+SELFCHECK PASSED

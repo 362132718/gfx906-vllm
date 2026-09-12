@@ -91,10 +91,19 @@ def perf_gate(per_step_ms):
 
 
 def gen(llm, max_tokens):
-    sp = SamplingParams(temperature=0.0, max_tokens=max_tokens)
+    # ignore_eos is mandatory for an A/B: without it an early EOS truncates the
+    # greedy run, and the arm that stops first reads fast per token but on a
+    # shorter window -- both per_step_ms and tok/s become arm-dependent noise.
+    sp = SamplingParams(temperature=0.0, max_tokens=max_tokens,
+                        ignore_eos=True)
     t0 = time.perf_counter()
     out = llm.generate([PROMPT], sp, use_tqdm=False)
-    return time.perf_counter() - t0, out[0]
+    dt = time.perf_counter() - t0
+    n = len(out[0].outputs[0].token_ids)
+    assert n == max_tokens, ("stopped early: %d != %d tokens -- the measured "
+                             "window is not the one the gate assumes"
+                             % (n, max_tokens))
+    return dt, out[0]
 
 
 def main():

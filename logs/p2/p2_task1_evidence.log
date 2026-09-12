@@ -1,0 +1,62 @@
+2026-09-09T13:01:02+00:00
+===PROD_GATE===
+[92mSuccessfully preprocessed all matching files.[0m
+W0909 13:01:04.481000 7787 torch/utils/cpp_extension.py:2778] The environment variable `PYTORCH_ROCM_ARCH` is not set, all archs for visible cards are included for compilation (gfx906).
+W0909 13:01:04.481000 7787 torch/utils/cpp_extension.py:2778] If this is not desired, please set the environment variable `PYTORCH_ROCM_ARCH` to specific architectures.
+P2 production gate (G-P1): sk=10 lib=lazy
+== K=5120 N=8192  Task0 ref graph=60.53us ulp_rms=0.0292 ==
+   [1] wiring  worst=1.22e-04 (gate <=5e-04) ok
+   [2] fp64    RMS=0.0292 MEAN=0.0009 MAX=1 (gate <=0.05, Task0 0.0292, <=2x) ok
+   [3] graph   eager=51.93 graph=60.42 us vs Task0 60.53 (-0.2%, tol 20%) | replay rewrote poison=True replay_bitstable=True ok
+   [4] vs proto sk=10 u=8 bit-equal=True n_diff=0 max_dist=0.000 ULP
+   temps={'card0': 43, 'card1': 41} clocks=card0 8: 1700Mhz * 2: 1000Mhz * | card1 8: 1700Mhz * 2: 1000Mhz *
+== K=5120 N=7168  Task0 ref graph=58.22us ulp_rms=0.0205 ==
+   [1] wiring  worst=1.22e-04 (gate <=5e-04) ok
+   [2] fp64    RMS=0.0205 MEAN=0.0004 MAX=1 (gate <=0.05, Task0 0.0205, <=2x) ok
+   [3] graph   eager=49.87 graph=58.83 us vs Task0 58.22 (+1.0%, tol 20%) | replay rewrote poison=True replay_bitstable=True ok
+   [4] vs proto sk=10 u=8 bit-equal=True n_diff=0 max_dist=0.000 ULP
+   temps={'card0': 44, 'card1': 41} clocks=card0 8: 1700Mhz * 2: 1000Mhz * | card1 8: 1700Mhz * 2: 1000Mhz *
+
+=== G-P1 VERDICT ===
+K=5120 N=8192 -> PASS (bit_equal=True)
+K=5120 N=7168 -> PASS (bit_equal=True)
+G-P1 PASS
+PROD-GATE-DONE
+===UNROLL_AB===
+[92mSuccessfully preprocessed all matching files.[0m
+W0909 13:01:27.654000 7806 torch/utils/cpp_extension.py:2778] The environment variable `PYTORCH_ROCM_ARCH` is not set, all archs for visible cards are included for compilation (gfx906).
+W0909 13:01:27.654000 7806 torch/utils/cpp_extension.py:2778] If this is not desired, please set the environment variable `PYTORCH_ROCM_ARCH` to specific architectures.
+== K=5120 N=8192  new==old: True   new==prototype: True ==
+   round 0  proto_torch=60.36  prod_new=60.45  prod_old=62.74  temps={'card0': 43, 'card1': 41}
+   round 1  prod_new=60.47  prod_old=62.79  proto_torch=60.38  temps={'card0': 44, 'card1': 41}
+   round 2  prod_old=62.77  proto_torch=60.39  prod_new=60.45  temps={'card0': 45, 'card1': 41}
+   round 3  proto_torch=60.36  prod_new=60.49  prod_old=62.75  temps={'card0': 46, 'card1': 41}
+   round 4  prod_new=60.43  prod_old=62.75  proto_torch=60.35  temps={'card0': 47, 'card1': 41}
+   MEDIAN proto=60.36 new=60.45 old=62.75 -> new-proto=+0.09 us (+0.14%), old-new=+2.30 us
+== K=5120 N=7168  new==old: True   new==prototype: True ==
+   round 0  proto_torch=58.15  prod_new=58.09  prod_old=60.27  temps={'card0': 47, 'card1': 41}
+   round 1  prod_new=58.07  prod_old=60.24  proto_torch=58.12  temps={'card0': 47, 'card1': 41}
+   round 2  prod_old=60.25  proto_torch=58.13  prod_new=58.09  temps={'card0': 47, 'card1': 41}
+   round 3  proto_torch=58.13  prod_new=58.08  prod_old=60.21  temps={'card0': 47, 'card1': 41}
+   round 4  prod_new=58.06  prod_old=60.23  proto_torch=58.12  temps={'card0': 47, 'card1': 41}
+   MEDIAN proto=58.13 new=58.08 old=60.24 -> new-proto=-0.05 us (-0.08%), old-new=+2.16 us
+UNROLL-AB-DONE
+===BODY_AB===
+[92mSuccessfully preprocessed all matching files.[0m
+W0909 13:01:31.665000 7825 torch/utils/cpp_extension.py:2778] The environment variable `PYTORCH_ROCM_ARCH` is not set, all archs for visible cards are included for compilation (gfx906).
+W0909 13:01:31.665000 7825 torch/utils/cpp_extension.py:2778] If this is not desired, please set the environment variable `PYTORCH_ROCM_ARCH` to specific architectures.
+== K=5120 N=8192  body_swap bit-equal to prod_so: True ==
+   round 0  proto_torch=60.36  body_swap=60.47  prod_so=60.52  temps={'card0': 44, 'card1': 41}
+   round 1  body_swap=60.51  prod_so=60.51  proto_torch=60.35  temps={'card0': 46, 'card1': 41}
+   round 2  prod_so=60.53  proto_torch=60.33  body_swap=60.51  temps={'card0': 46, 'card1': 41}
+   round 3  proto_torch=60.37  body_swap=60.51  prod_so=60.51  temps={'card0': 47, 'card1': 41}
+   round 4  body_swap=60.54  prod_so=60.49  proto_torch=60.33  temps={'card0': 47, 'card1': 41}
+   MEDIAN proto=60.35 swap=60.51 prod=60.51  -> swap-proto=+0.15 prod-swap=+0.01 us
+== K=5120 N=7168  body_swap bit-equal to prod_so: True ==
+   round 0  proto_torch=58.09  body_swap=58.05  prod_so=58.11  temps={'card0': 48, 'card1': 41}
+   round 1  body_swap=58.06  prod_so=58.12  proto_torch=58.11  temps={'card0': 48, 'card1': 41}
+   round 2  prod_so=58.10  proto_torch=58.11  body_swap=58.06  temps={'card0': 48, 'card1': 41}
+   round 3  proto_torch=58.09  body_swap=58.07  prod_so=58.13  temps={'card0': 48, 'card1': 41}
+   round 4  body_swap=58.06  prod_so=58.08  proto_torch=58.09  temps={'card0': 48, 'card1': 41}
+   MEDIAN proto=58.09 swap=58.06 prod=58.11  -> swap-proto=-0.03 prod-swap=+0.05 us
+BODY-AB-DONE

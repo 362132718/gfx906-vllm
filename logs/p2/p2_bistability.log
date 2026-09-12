@@ -1,0 +1,18 @@
+[92mSuccessfully preprocessed all matching files.[0m
+W0909 13:19:36.380000 8153 torch/utils/cpp_extension.py:2778] The environment variable `PYTORCH_ROCM_ARCH` is not set, all archs for visible cards are included for compilation (gfx906).
+W0909 13:19:36.380000 8153 torch/utils/cpp_extension.py:2778] If this is not desired, please set the environment variable `PYTORCH_ROCM_ARCH` to specific architectures.
+r0  proto=58.14 [sclk=1689 mclk=1000 edge=41.0C pwr=32.0W busy=10% -> sclk=1670 mclk=1000 edge=43.0C pwr=161.0W busy=99%]  prod=58.14 [sclk=1670 mclk=1000 edge=43.0C pwr=161.0W busy=99% -> sclk=1670 mclk=1000 edge=44.0C pwr=163.0W busy=99%]
+r1  prod=58.76 [sclk=1699 mclk=1000 edge=41.0C pwr=30.0W busy=0% -> sclk=1670 mclk=1000 edge=43.0C pwr=159.0W busy=99%]  proto=58.74 [sclk=1670 mclk=1000 edge=43.0C pwr=159.0W busy=99% -> sclk=1670 mclk=1000 edge=44.0C pwr=161.0W busy=99%]
+r2  proto=58.76 [sclk=1699 mclk=1000 edge=41.0C pwr=31.0W busy=0% -> sclk=1670 mclk=1000 edge=42.0C pwr=161.0W busy=100%]  prod=58.78 [sclk=1670 mclk=1000 edge=42.0C pwr=161.0W busy=100% -> sclk=1670 mclk=1000 edge=44.0C pwr=162.0W busy=100%]
+r3  prod=58.80 [sclk=1700 mclk=1000 edge=41.0C pwr=30.0W busy=0% -> sclk=1670 mclk=1000 edge=43.0C pwr=159.0W busy=100%]  proto=58.76 [sclk=1670 mclk=1000 edge=43.0C pwr=159.0W busy=100% -> sclk=1670 mclk=1000 edge=44.0C pwr=160.0W busy=100%]
+r4  proto=58.10 [sclk=1699 mclk=1000 edge=41.0C pwr=31.0W busy=0% -> sclk=1670 mclk=1000 edge=43.0C pwr=162.0W busy=100%]  prod=58.10 [sclk=1670 mclk=1000 edge=43.0C pwr=162.0W busy=100% -> sclk=1670 mclk=1000 edge=44.0C pwr=162.0W busy=100%]
+r5  prod=58.79 [sclk=1699 mclk=1000 edge=41.0C pwr=31.0W busy=0% -> sclk=1670 mclk=1000 edge=43.0C pwr=159.0W busy=99%]  proto=58.76 [sclk=1670 mclk=1000 edge=43.0C pwr=159.0W busy=99% -> sclk=1670 mclk=1000 edge=44.0C pwr=160.0W busy=100%]
+r6  proto=58.09 [sclk=1699 mclk=1000 edge=41.0C pwr=30.0W busy=0% -> sclk=1670 mclk=1000 edge=43.0C pwr=161.0W busy=100%]  prod=58.10 [sclk=1670 mclk=1000 edge=43.0C pwr=161.0W busy=100% -> sclk=1670 mclk=1000 edge=44.0C pwr=162.0W busy=99%]
+r7  prod=58.77 [sclk=1699 mclk=1000 edge=41.0C pwr=30.0W busy=0% -> sclk=1670 mclk=1000 edge=43.0C pwr=162.0W busy=100%]  proto=58.77 [sclk=1670 mclk=1000 edge=43.0C pwr=162.0W busy=100% -> sclk=1676 mclk=1000 edge=44.0C pwr=160.0W busy=96%]
+r8  proto=58.09 [sclk=1699 mclk=1000 edge=41.0C pwr=31.0W busy=0% -> sclk=1670 mclk=1000 edge=43.0C pwr=161.0W busy=100%]  prod=58.10 [sclk=1670 mclk=1000 edge=43.0C pwr=161.0W busy=100% -> sclk=1670 mclk=1000 edge=44.0C pwr=162.0W busy=100%]
+r9  prod=58.11 [sclk=1699 mclk=1000 edge=42.0C pwr=30.0W busy=0% -> sclk=1670 mclk=1000 edge=42.0C pwr=162.0W busy=100%]  proto=58.08 [sclk=1670 mclk=1000 edge=42.0C pwr=162.0W busy=100% -> sclk=1670 mclk=1000 edge=44.0C pwr=163.0W busy=100%]
+r10 proto=58.08 [sclk=1699 mclk=1000 edge=41.0C pwr=31.0W busy=0% -> sclk=1670 mclk=1000 edge=43.0C pwr=162.0W busy=100%]  prod=58.10 [sclk=1670 mclk=1000 edge=43.0C pwr=162.0W busy=100% -> sclk=1674 mclk=1000 edge=44.0C pwr=162.0W busy=90%]
+r11 prod=58.12 [sclk=1699 mclk=1000 edge=41.0C pwr=30.0W busy=0% -> sclk=1670 mclk=1000 edge=43.0C pwr=161.0W busy=100%]  proto=58.10 [sclk=1670 mclk=1000 edge=43.0C pwr=161.0W busy=100% -> sclk=1670 mclk=1000 edge=44.0C pwr=161.0W busy=100%]
+MEDIAN prod=58.13 proto=58.12  spread=0.72  prod-proto=+0.01 us
+prod sorted=[58.09570848941803, 58.09570848941803, 58.10233453909556, 58.10237427552541, 58.10904006163279, 58.1223318974177, 58.13570817311605, 58.76245597998301, 58.76904229323069, 58.78241856892904, 58.789084355036415, 58.7957501411438]
+BISTABILITY-DONE

@@ -50,6 +50,12 @@ docker cp "$CONTAINER:$SP/vllm/model_executor/layers/utils.py" \
   "$CTX/patches/layers_utils.py"
 docker cp "$CONTAINER:$SP/gfx906_gemv_fix.py" "$CTX/patches/gfx906_gemv_fix.py"
 docker cp "$CONTAINER:$SP/gfx906_gemv_fix.pth" "$CTX/patches/gfx906_gemv_fix.pth"
+# P2: unlike every other file in this group, the GEMV kernel source comes from the
+# repo, not from the container -- the container's libp2gemv.so is a dev build the
+# Dockerfile deliberately deletes before compiling this .hip (and [7/7]'s tarball
+# would otherwise carry it in). md5-check it against docker/patches/ afterwards:
+# this step overwrites $CTX/patches, so a stale build-context can shadow a new source.
+cp -f "$HERE/patches/p2_w4a16_gemv.hip" "$CTX/patches/p2_w4a16_gemv.hip"
 
 echo "== [4/7] delivery entry points (gfx906-serve / gfx906-selfcheck / QUICKSTART)"
 rm -rf "$CTX/entrypoint"

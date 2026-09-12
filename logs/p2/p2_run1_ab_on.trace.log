@@ -1,0 +1,31 @@
+rank 0: p0_rank0.1788965597204833475.pt.trace.json.gz | 2251.5 ms busy(sum) / 2251.2 ms busy(union) over 4806.6 ms span | worst gap 11.6 ms | 82176 device events
+    cats: {'M': 60, 'user_annotation': 128, 'cpu_op': 25920, 'cuda_runtime': 8580, 'f': 86468, 's': 4288, 'kernel': 82176, 'gpu_user_annotation': 128, 'Trace': 1, 'UNSEEN-CATEGORY:Trace': 1, 'i': 2}
+rank 1: p0_rank1.1788965597185617011.pt.trace.json.gz | 2279.4 ms busy(sum) / 2279.0 ms busy(union) over 4806.6 ms span | worst gap 13.8 ms | 82176 device events
+    cats: {'M': 60, 'user_annotation': 128, 'cpu_op': 25920, 'cuda_runtime': 8514, 'f': 86402, 's': 4288, 'kernel': 82176, 'gpu_user_annotation': 128, 'Trace': 1, 'UNSEEN-CATEGORY:Trace': 1, 'i': 2}
+GEMV kernels: 16384 launches over 64.0 steps (census expects 256/step)
+TOP25 by device time (us per window, primary rank):
+  1271133.5    16384  void vllm::gptq::gemm_half_q_half_gptq_4bit_kernel<true, 1>(__half const*, unsigned int const*, unsi
+   523252.7     8320  ncclDevKernel_Generic_4(ncclDevKernelArgsStorage<4096ul>) [clone .kd]
+   109945.8     3136  void LLGemm1_kernel<c10::Half, 4>(c10::Half const*, c10::Half const*, c10::Half*, int) [clone .kd]
+    32735.0     3072  fused_recurrent_gated_delta_rule_packed_decode_kernel.kd
+    24494.9     4160  triton_poi_fused_1.kd
+    20660.5     4096  triton_poi_fused_0.kd
+    20398.2     4032  triton_poi_fused_7.kd
+    20155.6     3072  triton_red_fused__to_copy_add_fused_add_rms_norm_gptq_gemm_out_zero_4.kd
+    19125.1     2048  triton_red_fused__to_copy_add_fused_add_rms_norm_6.kd
+    18675.1     3072  triton_poi_fused_gptq_gemm_out_mul_silu_slice_zero_5.kd
+    18270.8     1024  kernel_unified_attention.kd
+    16951.9     3072  triton_poi_fused__to_copy__unsafe_view_add_clone_gptq_gemm_out_mean_mul_pow_rsqrt_silu_view_zero_3.k
+    15548.6     3072  triton_poi_fused_9.kd
+    15527.0     3072  triton_poi_fused_8.kd
+    15516.6     3072  _causal_conv1d_update_kernel.kd
+    15494.4     3072  triton_per_fused_2.kd
+     9931.0     1024  triton_red_fused__to_copy_add_fused_add_rms_norm_gptq_gemm_out_zero_6.kd
+     9891.2     1024  triton_red_fused__to_copy_add_fused_add_rms_norm_4.kd
+     9069.0     1024  reduce_segments.kd
+     8424.2     1024  triton_poi_fused_gptq_gemm_out_mul_silu_slice_zero_3.kd
+     8099.6     1600  __amd_rocclr_copyBuffer.kd
+     6946.3     1024  triton_red_fused__to_copy_add_fused_add_rms_norm_gptq_gemm_out_zero_2.kd
+     5614.3     1024  triton_poi_fused_11.kd
+     5202.0     1024  reshape_and_cache_kernel_flash.kd
+     5154.4     1024  triton_red_fused_10.kd

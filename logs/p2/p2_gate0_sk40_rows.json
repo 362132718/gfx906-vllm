@@ -1,0 +1,58 @@
+[
+ {
+  "K": 5120,
+  "N": 8192,
+  "variant": 3,
+  "splitk": 40,
+  "unroll": 4,
+  "wiring": true,
+  "ulp_rms": 0.0366,
+  "ulp_mean": 0.0013,
+  "ulp_max": 1,
+  "eager_us": 59.11,
+  "graph_us": 67.65,
+  "speedup": 1.168
+ },
+ {
+  "K": 5120,
+  "N": 8192,
+  "variant": 3,
+  "splitk": 40,
+  "unroll": 8,
+  "wiring": true,
+  "ulp_rms": 0.0366,
+  "ulp_mean": 0.0013,
+  "ulp_max": 1,
+  "eager_us": 59.09,
+  "graph_us": 67.73,
+  "speedup": 1.166
+ },
+ {
+  "K": 5120,
+  "N": 7168,
+  "variant": 3,
+  "splitk": 40,
+  "unroll": 4,
+  "wiring": true,
+  "ulp_rms": 0.0312,
+  "ulp_mean": 0.001,
+  "ulp_max": 1,
+  "eager_us": 53.65,
+  "graph_us": 63.97,
+  "speedup": 1.159
+ },
+ {
+  "K": 5120,
+  "N": 7168,
+  "variant": 3,
+  "splitk": 40,
+  "unroll": 8,
+  "wiring": true,
+  "ulp_rms": 0.0312,
+  "ulp_mean": 0.001,
+  "ulp_max": 1,
+  "eager_us": 54.37,
+  "graph_us": 61.91,
+  "speedup": 1.197
+ }
+]

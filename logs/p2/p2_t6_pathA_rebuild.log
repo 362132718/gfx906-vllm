@@ -1,0 +1,60 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.rocm_gfx906
+#1 transferring dockerfile: 14.20kB done
+#1 DONE 0.0s
+
+#2 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#2 DONE 9.2s
+
+#3 docker-image://docker.io/docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
+#3 resolve docker.io/docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32 0.0s done
+#3 CACHED
+
+#4 [internal] load metadata for docker.io/library/vllm-gfx906:rebuilt
+#4 DONE 206.1s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 2B done
+#5 DONE 0.0s
+
+#6 [final 1/8] FROM docker.io/library/vllm-gfx906:rebuilt@sha256:3db9747fd931ff27a0697195d2e6cc75820bb6f6f3cbd1bf694c2a3476da9eb1
+#6 resolve docker.io/library/vllm-gfx906:rebuilt@sha256:3db9747fd931ff27a0697195d2e6cc75820bb6f6f3cbd1bf694c2a3476da9eb1 0.0s done
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 11.62kB done
+#7 DONE 0.0s
+
+#8 [final 2/8] COPY patches/layers_utils.py /usr/local/lib/python3.12/dist-packages/vllm/model_executor/layers/utils.py
+#8 CACHED
+
+#9 [final 3/8] RUN rm -rf /root/.cache/vllm /root/.cache/vllm-w4a16-*
+#9 CACHED
+
+#10 [final 4/8] COPY entrypoint/ /opt/gfx906/
+#10 DONE 0.0s
+
+#11 [final 5/8] RUN chmod 755 /opt/gfx906/serve.sh /opt/gfx906/selfcheck.sh     && ln -sf /opt/gfx906/serve.sh /usr/local/bin/gfx906-serve     && ln -sf /opt/gfx906/selfcheck.sh /usr/local/bin/gfx906-selfcheck
+#11 DONE 0.2s
+
+#12 [final 6/8] RUN test -f /usr/local/lib/python3.12/dist-packages/torch/lib/librccl.so.1.0     && test -L /usr/local/lib/python3.12/dist-packages/torch/lib/librccl.so     && ls /usr/local/lib/python3.12/dist-packages/torch/lib/rocblas/library/ | grep -q gfx906     && test -f /usr/local/lib/python3.12/dist-packages/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py     && grep -q WNA16ExllamaKernel /usr/local/lib/python3.12/dist-packages/vllm/model_executor/kernels/linear/__init__.py     && grep -q gptq_gemm_out /usr/local/lib/python3.12/dist-packages/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py     && grep -q "is_gfx906" /usr/local/lib/python3.12/dist-packages/vllm/v1/attention/ops/triton_decode_attention.py     && grep -q use_gfx906_gemv /usr/local/lib/python3.12/dist-packages/vllm/model_executor/layers/utils.py     && test -s /usr/local/lib/python3.12/dist-packages/gfx906/libp2gemv.so     && nm -D --defined-only /usr/local/lib/python3.12/dist-packages/gfx906/libp2gemv.so | grep -qw p2_gemv     && grep -q _P2_SHAPES /usr/local/lib/python3.12/dist-packages/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py     && test -f /usr/local/lib/python3.12/dist-packages/gfx906_gemv_fix.py && test -f /usr/local/lib/python3.12/dist-packages/gfx906_gemv_fix.pth     && grep -aq gptq_gemm_out /usr/local/lib/python3.12/dist-packages/vllm/_C_stable_libtorch.abi3.so     && test -x /opt/gfx906/serve.sh && test -L /usr/local/bin/gfx906-serve     && test -f /opt/gfx906/QUICKSTART.md     && python3 -c "from importlib.metadata import version as v; print('torch', v('torch'), '| vllm', v('vllm'))"
+#12 2.242 torch 2.13.0+rocm7.2 | vllm 0.28.0+rocm724
+#12 DONE 2.6s
+
+#13 [final 7/8] RUN test -z "$(ls -A /root/.cache 2>/dev/null)"     || { echo 'leak: /root/.cache is not empty in the delivery image'; ls -A /root/.cache; exit 1; }
+#13 DONE 0.2s
+
+#14 [final 8/8] WORKDIR /work
+#14 DONE 0.0s
+
+#15 exporting to image
+#15 exporting layers
+#15 exporting layers 0.2s done
+#15 exporting manifest sha256:40c59f1df26f7f786b8c858c13a2ef85681bcee1b9bf5c3b322103d41deefcd1 done
+#15 exporting config sha256:fcaece48779f10f6d4cf4c45a902f3714983277638bdbe1ad663bd4291103e71 0.0s done
+#15 exporting attestation manifest sha256:a16216e6a98bc9ad44f7ba19cbfab0a453bddbb5c36f426521c0bd6988c4ab6e 0.0s done
+#15 exporting manifest list sha256:2fba84a62576a7b0188bc9f4e03f06c61ab7e00f1bc7c14f40dfca63afd9b14e done
+#15 naming to docker.io/library/vllm-gfx906:latest done
+#15 unpacking to docker.io/library/vllm-gfx906:latest 0.1s done
+#15 DONE 0.3s

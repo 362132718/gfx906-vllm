@@ -1,0 +1,34 @@
+== installed .so
+84b762bab366f44901d08e8ace772979  /usr/local/lib/python3.12/dist-packages/gfx906/libp2gemv.so
+== shipped module md5 (want 37325e2aa3da0dcdcf3317111e098883)
+37325e2aa3da0dcdcf3317111e098883  wna16_exllama.py
+37325e2aa3da0dcdcf3317111e098883  /usr/local/lib/python3.12/dist-packages/vllm/model_executor/kernels/linear/mixed_precision/wna16_exllama.py
+== [1] fence extraction + drift check vs landed
+wrote p2_kernels_prod.hip (6278 B) and p2_patch_blocks.py (4142 B)
+fragment compiles: task2-step3-warmup
+fragment compiles: task2-step4-route
+  fence in landed file loader       ok
+  fence in landed file registration ok
+  fence in landed file warm-up      ok
+  fence in landed file route        ok
+== [2] hipcc build of the extracted .hip
+   source vs Task 1 shipped .hip:
+af1535d67012d54e3a525e4686858855  p2_kernels_prod.hip
+af1535d67012d54e3a525e4686858855  /work/p2/p2_kernels_prod.hip
+   HIP-SOURCE-IDENTICAL
+   symbol p2_gemv: ok
+== [3] fence-built vs installed .so -- identical means Task 1 shipped the fence
+c297fd556ff110365b675b03ae9c25a5  libp2gemv_fence.so
+84b762bab366f44901d08e8ace772979  /usr/local/lib/python3.12/dist-packages/gfx906/libp2gemv.so
+SO-DIFFERS
+== [4] real ctypes + fp64 reference (against the installed .so)
+[1] patch blocks import: _P2_OK=True (expect True)
+[2] custom op registered under torch.ops.vllm (mutates_args + annotations accepted by infer_schema)
+[3] fp64 ULP  RMS=0.0167 MEAN=0.0003 MAX=1.0  (gate: RMS <= 0.05)
+[4] rc pass-through works: p2_gemv rc=-1
+[5] replay rewrote the poisoned buffer: True | bit-identical to pre-capture: True
+PLAN-BLOCKS-OK
+== [5] gate file in sync with the repo copy
+5d3d9c1c18b4201418b0414e7cb14a19  p2_route_gate.py
+1bc7c4d2e717cc6563bf6e8fd12e8b0b  /work/p2/p2_route_gate.py
+FENCE-RECHECK-DONE

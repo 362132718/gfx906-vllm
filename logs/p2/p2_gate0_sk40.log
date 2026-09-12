@@ -1,0 +1,21 @@
+[92mSuccessfully preprocessed all matching files.[0m
+W0909 09:41:57.207000 7091 torch/utils/cpp_extension.py:2778] The environment variable `PYTORCH_ROCM_ARCH` is not set, all archs for visible cards are included for compilation (gfx906).
+W0909 09:41:57.207000 7091 torch/utils/cpp_extension.py:2778] If this is not desired, please set the environment variable `PYTORCH_ROCM_ARCH` to specific architectures.
+grid sk=(40,) u=(4, 8) (sk must divide 40 = K/GROUP)
+== K=5120 N=8192 incumbent-rot graph=78.99us gate=60.8us (=1.30x) ==
+CHECK variant=3 splitk=40 unroll=4 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=9.54e-04(ok) OK
+   sk=40 u=4  wiring=ok ULP rms=0.0366 max=1 | eager=59.11 graph=67.65 us (1.168x inc, gate 60.8) 
+CHECK variant=3 splitk=40 unroll=8 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=8.40e-04(ok) OK
+   sk=40 u=8  wiring=ok ULP rms=0.0366 max=1 | eager=59.09 graph=67.73 us (1.166x inc, gate 60.8) 
+   temps={'card0': 42, 'card1': 37} clocks=card0 8: 1700Mhz * 2: 1000Mhz * | card1 8: 1700Mhz * 2: 1000Mhz *
+== K=5120 N=7168 incumbent-rot graph=74.14us gate=57.0us (=1.30x) ==
+CHECK variant=3 splitk=40 unroll=4 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=5.61e-04(ok) OK
+   sk=40 u=4  wiring=ok ULP rms=0.0312 max=1 | eager=53.65 graph=63.97 us (1.159x inc, gate 57.0) 
+CHECK variant=3 splitk=40 unroll=8 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=9.64e-04(ok) OK
+   sk=40 u=8  wiring=ok ULP rms=0.0312 max=1 | eager=54.37 graph=61.91 us (1.197x inc, gate 57.0) 
+   temps={'card0': 42, 'card1': 37} clocks=card0 8: 1700Mhz * 2: 1000Mhz * | card1 8: 1700Mhz * 2: 1000Mhz *
+
+=== VERDICT ===
+GATE K=5120 N=8192 best={'K': 5120, 'N': 8192, 'variant': 3, 'splitk': 40, 'unroll': 4, 'wiring': True, 'ulp_rms': 0.0366, 'ulp_mean': 0.0013, 'ulp_max': 1, 'eager_us': 59.11, 'graph_us': 67.65, 'speedup': 1.168} gate<=60.8 -> FAIL
+GATE K=5120 N=7168 best={'K': 5120, 'N': 7168, 'variant': 3, 'splitk': 40, 'unroll': 8, 'wiring': True, 'ulp_rms': 0.0312, 'ulp_mean': 0.001, 'ulp_max': 1, 'eager_us': 54.37, 'graph_us': 61.91, 'speedup': 1.197} gate<=57.0 -> FAIL
+GATE0-DONE

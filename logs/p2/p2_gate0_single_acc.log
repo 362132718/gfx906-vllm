@@ -1,0 +1,88 @@
+START=2026-09-09T09:39:07+00:00
+[92mSuccessfully preprocessed all matching files.[0m
+W0909 09:39:09.634000 7000 torch/utils/cpp_extension.py:2778] The environment variable `PYTORCH_ROCM_ARCH` is not set, all archs for visible cards are included for compilation (gfx906).
+W0909 09:39:09.634000 7000 torch/utils/cpp_extension.py:2778] If this is not desired, please set the environment variable `PYTORCH_ROCM_ARCH` to specific architectures.
+grid sk=(2, 4, 5, 8, 10, 20) u=(4, 8, 16) (sk must divide 40 = K/GROUP)
+== K=5120 N=8192 incumbent-rot graph=80.05us gate=60.8us (=1.32x) ==
+CHECK variant=3 splitk=2 unroll=4 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=1.48e-03(ok) OK
+   sk=2  u=4  wiring=ok ULP rms=0.0292 max=1 | eager=182.77 graph=191.78 us (0.417x inc, gate 60.8) 
+CHECK variant=3 splitk=2 unroll=8 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=8.67e-04(ok) OK
+   sk=2  u=8  wiring=ok ULP rms=0.0292 max=1 | eager=182.95 graph=191.50 us (0.418x inc, gate 60.8) 
+CHECK variant=3 splitk=2 unroll=16 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=8.86e-04(ok) OK
+   sk=2  u=16 wiring=ok ULP rms=0.0292 max=1 | eager=183.33 graph=191.57 us (0.418x inc, gate 60.8) 
+CHECK variant=3 splitk=4 unroll=4 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=6.90e-04(ok) OK
+   sk=4  u=4  wiring=ok ULP rms=0.0292 max=1 | eager=98.85 graph=107.41 us (0.745x inc, gate 60.8) 
+CHECK variant=3 splitk=4 unroll=8 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=9.47e-04(ok) OK
+   sk=4  u=8  wiring=ok ULP rms=0.0292 max=1 | eager=98.74 graph=107.37 us (0.746x inc, gate 60.8) 
+CHECK variant=3 splitk=4 unroll=16 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=7.90e-04(ok) OK
+   sk=4  u=16 wiring=ok ULP rms=0.0292 max=1 | eager=98.87 graph=107.54 us (0.744x inc, gate 60.8) 
+CHECK variant=3 splitk=5 unroll=4 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=1.43e-03(ok) OK
+   sk=5  u=4  wiring=ok ULP rms=0.0271 max=1 | eager=81.93 graph=90.57 us (0.884x inc, gate 60.8) 
+CHECK variant=3 splitk=5 unroll=8 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=1.60e-03(ok) OK
+   sk=5  u=8  wiring=ok ULP rms=0.0271 max=1 | eager=81.85 graph=90.53 us (0.884x inc, gate 60.8) 
+CHECK variant=3 splitk=5 unroll=16 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=8.76e-04(ok) OK
+   sk=5  u=16 wiring=ok ULP rms=0.0271 max=1 | eager=81.75 graph=90.46 us (0.885x inc, gate 60.8) 
+CHECK variant=3 splitk=8 unroll=4 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=9.54e-04(ok) OK
+   sk=8  u=4  wiring=ok ULP rms=0.0271 max=1 | eager=58.79 graph=67.48 us (1.186x inc, gate 60.8) 
+CHECK variant=3 splitk=8 unroll=8 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=8.49e-04(ok) OK
+   sk=8  u=8  wiring=ok ULP rms=0.0271 max=1 | eager=58.83 graph=67.49 us (1.186x inc, gate 60.8) 
+CHECK variant=3 splitk=8 unroll=16 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=9.12e-04(ok) OK
+   sk=8  u=16 wiring=ok ULP rms=0.0271 max=1 | eager=58.79 graph=67.49 us (1.186x inc, gate 60.8) 
+CHECK variant=3 splitk=10 unroll=4 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=9.25e-04(ok) OK
+   sk=10 u=4  wiring=ok ULP rms=0.0292 max=1 | eager=51.86 graph=60.51 us (1.323x inc, gate 60.8) GATE-OK
+CHECK variant=3 splitk=10 unroll=8 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=9.74e-04(ok) OK
+   sk=10 u=8  wiring=ok ULP rms=0.0292 max=1 | eager=51.85 graph=60.53 us (1.322x inc, gate 60.8) GATE-OK
+CHECK variant=3 splitk=10 unroll=16 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=9.54e-04(ok) OK
+   sk=10 u=16 wiring=ok ULP rms=0.0292 max=1 | eager=51.88 graph=60.56 us (1.322x inc, gate 60.8) GATE-OK
+CHECK variant=3 splitk=20 unroll=4 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=9.00e-04(ok) OK
+   sk=20 u=4  wiring=ok ULP rms=0.0312 max=1 | eager=53.47 graph=62.16 us (1.288x inc, gate 60.8) 
+CHECK variant=3 splitk=20 unroll=8 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=8.76e-04(ok) OK
+   sk=20 u=8  wiring=ok ULP rms=0.0312 max=1 | eager=53.46 graph=62.18 us (1.287x inc, gate 60.8) 
+CHECK variant=3 splitk=20 unroll=16 K=5120 N=8192 wiring=1.22e-04(ok) randx_rel=9.58e-04(ok) OK
+   sk=20 u=16 wiring=ok ULP rms=0.0312 max=1 | eager=53.46 graph=62.16 us (1.288x inc, gate 60.8) 
+   temps={'card0': 45, 'card1': 36} clocks=card0 8: 1700Mhz * 2: 1000Mhz * | card1 8: 1700Mhz * 2: 1000Mhz *
+== K=5120 N=7168 incumbent-rot graph=74.07us gate=57.0us (=1.30x) ==
+CHECK variant=3 splitk=2 unroll=4 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=9.10e-04(ok) OK
+   sk=2  u=4  wiring=ok ULP rms=0.0392 max=2 | eager=182.58 graph=190.81 us (0.388x inc, gate 57.0) 
+CHECK variant=3 splitk=2 unroll=8 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=8.84e-04(ok) OK
+   sk=2  u=8  wiring=ok ULP rms=0.0392 max=2 | eager=182.34 graph=190.85 us (0.388x inc, gate 57.0) 
+CHECK variant=3 splitk=2 unroll=16 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=9.23e-04(ok) OK
+   sk=2  u=16 wiring=ok ULP rms=0.0392 max=2 | eager=182.39 graph=190.95 us (0.388x inc, gate 57.0) 
+CHECK variant=3 splitk=4 unroll=4 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=9.57e-04(ok) OK
+   sk=4  u=4  wiring=ok ULP rms=0.0334 max=1 | eager=97.02 graph=105.67 us (0.701x inc, gate 57.0) 
+CHECK variant=3 splitk=4 unroll=8 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=9.69e-04(ok) OK
+   sk=4  u=8  wiring=ok ULP rms=0.0334 max=1 | eager=97.01 graph=105.66 us (0.701x inc, gate 57.0) 
+CHECK variant=3 splitk=4 unroll=16 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=8.34e-04(ok) OK
+   sk=4  u=16 wiring=ok ULP rms=0.0334 max=1 | eager=97.03 graph=105.65 us (0.701x inc, gate 57.0) 
+CHECK variant=3 splitk=5 unroll=4 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=8.72e-04(ok) OK
+   sk=5  u=4  wiring=ok ULP rms=0.0264 max=1 | eager=81.07 graph=89.65 us (0.826x inc, gate 57.0) 
+CHECK variant=3 splitk=5 unroll=8 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=1.67e-03(ok) OK
+   sk=5  u=8  wiring=ok ULP rms=0.0264 max=1 | eager=81.00 graph=89.65 us (0.826x inc, gate 57.0) 
+CHECK variant=3 splitk=5 unroll=16 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=7.67e-04(ok) OK
+   sk=5  u=16 wiring=ok ULP rms=0.0264 max=1 | eager=81.00 graph=89.64 us (0.826x inc, gate 57.0) 
+CHECK variant=3 splitk=8 unroll=4 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=8.95e-04(ok) OK
+   sk=8  u=4  wiring=ok ULP rms=0.0236 max=1 | eager=56.71 graph=65.41 us (1.132x inc, gate 57.0) 
+CHECK variant=3 splitk=8 unroll=8 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=9.68e-04(ok) OK
+   sk=8  u=8  wiring=ok ULP rms=0.0236 max=1 | eager=56.68 graph=65.40 us (1.133x inc, gate 57.0) 
+CHECK variant=3 splitk=8 unroll=16 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=1.07e-03(ok) OK
+   sk=8  u=16 wiring=ok ULP rms=0.0236 max=1 | eager=56.73 graph=65.45 us (1.132x inc, gate 57.0) 
+CHECK variant=3 splitk=10 unroll=4 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=9.54e-04(ok) OK
+   sk=10 u=4  wiring=ok ULP rms=0.0205 max=1 | eager=49.53 graph=58.21 us (1.273x inc, gate 57.0) 
+CHECK variant=3 splitk=10 unroll=8 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=9.59e-04(ok) OK
+   sk=10 u=8  wiring=ok ULP rms=0.0205 max=1 | eager=49.54 graph=58.22 us (1.272x inc, gate 57.0) 
+CHECK variant=3 splitk=10 unroll=16 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=7.27e-04(ok) OK
+   sk=10 u=16 wiring=ok ULP rms=0.0205 max=1 | eager=49.53 graph=58.21 us (1.272x inc, gate 57.0) 
+CHECK variant=3 splitk=20 unroll=4 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=9.46e-04(ok) OK
+   sk=20 u=4  wiring=ok ULP rms=0.0264 max=1 | eager=50.80 graph=59.49 us (1.245x inc, gate 57.0) 
+CHECK variant=3 splitk=20 unroll=8 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=9.46e-04(ok) OK
+   sk=20 u=8  wiring=ok ULP rms=0.0264 max=1 | eager=50.87 graph=59.63 us (1.242x inc, gate 57.0) 
+CHECK variant=3 splitk=20 unroll=16 K=5120 N=7168 wiring=1.22e-04(ok) randx_rel=9.02e-04(ok) OK
+   sk=20 u=16 wiring=ok ULP rms=0.0264 max=1 | eager=50.81 graph=59.48 us (1.245x inc, gate 57.0) 
+   temps={'card0': 46, 'card1': 36} clocks=card0 8: 1700Mhz * 2: 1000Mhz * | card1 8: 1700Mhz * 2: 1000Mhz *
+
+=== VERDICT ===
+GATE K=5120 N=8192 best={'K': 5120, 'N': 8192, 'variant': 3, 'splitk': 10, 'unroll': 4, 'wiring': True, 'ulp_rms': 0.0292, 'ulp_mean': 0.0009, 'ulp_max': 1, 'eager_us': 51.86, 'graph_us': 60.51, 'speedup': 1.323} gate<=60.8 -> PASS
+GATE K=5120 N=7168 best={'K': 5120, 'N': 7168, 'variant': 3, 'splitk': 10, 'unroll': 4, 'wiring': True, 'ulp_rms': 0.0205, 'ulp_mean': 0.0004, 'ulp_max': 1, 'eager_us': 49.53, 'graph_us': 58.21, 'speedup': 1.273} gate<=57.0 -> FAIL
+GATE0-DONE
+EXIT=0
+END=2026-09-09T09:40:14+00:00

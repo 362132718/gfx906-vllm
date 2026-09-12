@@ -1,0 +1,79 @@
+L2 gate on real engine operands: 8 dump(s), gate RMS <=0.05 and <= incumbent/10
+
+-- 5120x7168 dev0 pid14510 hit#17  (l2_dump_5120x7168_dev0_pid14510_1.pt)
+   ref      |y| max=7.653 mean=1.7788 n=7168
+   P2 eng   RMS=0.0118 MEAN=0.0001 MAX=1 >0=0.01% | big(n=7092) RMS=0.0119 MAX=1
+   INC      RMS=42.048 MEAN=3.419 MAX=2700 >0=71.65% | big RMS=4.134 MAX=107   (3 runs RMS=[42.048, 35.067, 55.419])
+   ratio    INC/P2 = 3560x  (need >=10x)
+   P2 vs INC same operands: RMS=42.05 MAX=2700 >0=71.7% | rerun bit-equal=True
+   INC rerun vs itself: MAX=1360 ULP, 71.3% of positions move (the incumbent's own noise floor)
+   [PASS]
+
+-- 5120x7168 dev0 pid14510 hit#18  (l2_dump_5120x7168_dev0_pid14510_2.pt)
+   ref      |y| max=8.295 mean=1.6352 n=7168
+   P2 eng   RMS=0.0264 MEAN=0.0007 MAX=1 >0=0.07% | big(n=7090) RMS=0.0206 MAX=1
+   INC      RMS=62.018 MEAN=3.660 MAX=4655 >0=73.94% | big RMS=4.335 MAX=123   (3 runs RMS=[62.018, 29.678, 34.663])
+   ratio    INC/P2 = 2348x  (need >=10x)
+   P2 vs INC same operands: RMS=62.02 MAX=4655 >0=73.9% | rerun bit-equal=True
+   INC rerun vs itself: MAX=4096 ULP, 72.5% of positions move (the incumbent's own noise floor)
+   [PASS]
+
+-- 5120x7168 dev0 pid14511 hit#17  (l2_dump_5120x7168_dev0_pid14511_1.pt)
+   ref      |y| max=9.382 mean=1.8902 n=7168
+   P2 eng   RMS=0.0205 MEAN=0.0004 MAX=1 >0=0.04% | big(n=7105) RMS=0.0119 MAX=1
+   INC      RMS=65.586 MEAN=3.233 MAX=5406 >0=72.31% | big RMS=4.162 MAX=105   (3 runs RMS=[65.586, 94.103, 30.45])
+   ratio    INC/P2 = 3206x  (need >=10x)
+   P2 vs INC same operands: RMS=65.59 MAX=5406 >0=72.3% | rerun bit-equal=True
+   INC rerun vs itself: MAX=6592 ULP, 71.5% of positions move (the incumbent's own noise floor)
+   [PASS]
+
+-- 5120x7168 dev0 pid14511 hit#18  (l2_dump_5120x7168_dev0_pid14511_2.pt)
+   ref      |y| max=10.629 mean=1.5434 n=7168
+   P2 eng   RMS=0.0205 MEAN=0.0004 MAX=1 >0=0.04% | big(n=7102) RMS=0.0168 MAX=1
+   INC      RMS=40.026 MEAN=3.539 MAX=2028 >0=73.35% | big RMS=4.014 MAX=61   (3 runs RMS=[40.026, 116.7, 59.773])
+   ratio    INC/P2 = 1956x  (need >=10x)
+   P2 vs INC same operands: RMS=40.03 MAX=2029 >0=73.4% | rerun bit-equal=True
+   INC rerun vs itself: MAX=5760 ULP, 68.9% of positions move (the incumbent's own noise floor)
+   [PASS]
+
+-- 5120x8192 dev0 pid13762 hit#49  (l2_dump_5120x8192_dev0_pid13762_1.pt)
+   ref      |y| max=38.678 mean=1.7831 n=8192
+   P2 eng   RMS=0.0331 MEAN=0.0011 MAX=1 >0=0.11% | big(n=8152) RMS=0.0222 MAX=1
+   INC      RMS=50.174 MEAN=4.074 MAX=3382 >0=73.69% | big RMS=6.752 MAX=184   (3 runs RMS=[50.174, 82.579, 157.111])
+   ratio    INC/P2 = 1514x  (need >=10x)
+   P2 vs INC same operands: RMS=50.16 MAX=3381 >0=73.7% | rerun bit-equal=True
+   INC rerun vs itself: MAX=9504 ULP, 77.4% of positions move (the incumbent's own noise floor)
+   [PASS]
+
+-- 5120x8192 dev0 pid13762 hit#51  (l2_dump_5120x8192_dev0_pid13762_2.pt)
+   ref      |y| max=7.494 mean=0.3278 n=8192
+   P2 eng   RMS=0.0110 MEAN=0.0001 MAX=1 >0=0.01% | big(n=8015) RMS=0.0112 MAX=1
+   INC      RMS=29.219 MEAN=3.891 MAX=1571 >0=76.05% | big RMS=4.380 MAX=84   (3 runs RMS=[29.219, 44.844, 36.903])
+   ratio    INC/P2 = 2645x  (need >=10x)
+   P2 vs INC same operands: RMS=29.22 MAX=1571 >0=76.0% | rerun bit-equal=True
+   INC rerun vs itself: MAX=2560 ULP, 79.6% of positions move (the incumbent's own noise floor)
+   [PASS]
+
+-- 5120x8192 dev0 pid13763 hit#49  (l2_dump_5120x8192_dev0_pid13763_1.pt)
+   ref      |y| max=45.173 mean=1.7047 n=8192
+   P2 eng   RMS=0.0156 MEAN=0.0002 MAX=1 >0=0.02% | big(n=8158) RMS=0.0111 MAX=1
+   INC      RMS=48.400 MEAN=3.844 MAX=3373 >0=74.45% | big RMS=8.556 MAX=322   (3 runs RMS=[48.4, 24.935, 96.657])
+   ratio    INC/P2 = 3098x  (need >=10x)
+   P2 vs INC same operands: RMS=48.41 MAX=3373 >0=74.5% | rerun bit-equal=True
+   INC rerun vs itself: MAX=5120 ULP, 77.9% of positions move (the incumbent's own noise floor)
+   [PASS]
+
+-- 5120x8192 dev0 pid13763 hit#51  (l2_dump_5120x8192_dev0_pid13763_2.pt)
+   ref      |y| max=6.229 mean=0.3063 n=8192
+   P2 eng   RMS=0.0156 MEAN=0.0002 MAX=1 >0=0.02% | big(n=8006) RMS=0.0158 MAX=1
+   INC      RMS=20.329 MEAN=3.669 MAX=773 >0=76.16% | big RMS=4.191 MAX=51   (3 runs RMS=[20.329, 36.204, 20.888])
+   ratio    INC/P2 = 1301x  (need >=10x)
+   P2 vs INC same operands: RMS=20.33 MAX=773 >0=76.1% | rerun bit-equal=True
+   INC rerun vs itself: MAX=2008 ULP, 79.5% of positions move (the incumbent's own noise floor)
+   [PASS]
+
+=== per-family verdict ===
+K=5120 N=7168  4 dump(s): worst P2 RMS=0.0264 (gate 0.05), min INC/P2=1956x (need 10x), rerun-bit-equal=True -> PASS
+K=5120 N=8192  4 dump(s): worst P2 RMS=0.0331 (gate 0.05), min INC/P2=1301x (need 10x), rerun-bit-equal=True -> PASS
+G-P4 L2 PASS  (8 dumps)
+L2-GATE-DONE

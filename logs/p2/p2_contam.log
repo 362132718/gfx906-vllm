@@ -1,0 +1,35 @@
+2026-09-09T13:09:38+00:00
+[92mSuccessfully preprocessed all matching files.[0m
+W0909 13:09:40.895000 7972 torch/utils/cpp_extension.py:2778] The environment variable `PYTORCH_ROCM_ARCH` is not set, all archs for visible cards are included for compilation (gfx906).
+W0909 13:09:40.895000 7972 torch/utils/cpp_extension.py:2778] If this is not desired, please set the environment variable `PYTORCH_ROCM_ARCH` to specific architectures.
+== K=5120 N=8192 ==
+   CLEAN r0 prod=60.47 proto=60.46 temps={'card0': 44, 'card1': 41}
+   CLEAN r1 prod=60.46 proto=60.44 temps={'card0': 45, 'card1': 41}
+   CLEAN r2 prod=60.48 proto=60.46 temps={'card0': 46, 'card1': 41}
+   CLEAN r3 prod=60.47 proto=60.47 temps={'card0': 47, 'card1': 41}
+   CLEAN r4 prod=60.47 proto=60.45 temps={'card0': 47, 'card1': 41}
+   CLEAN MEDIAN K=5120 N=8192 prod=60.47 proto=60.46  prod-proto=+0.01 us
+   (heavy arms done: wiring=1.22e-04 ulp_rms=0.0292)
+   POSTARMS r0 prod=60.46 proto=60.41 temps={'card0': 46, 'card1': 42}
+   POSTARMS r1 prod=60.43 proto=60.41 temps={'card0': 47, 'card1': 41}
+   POSTARMS r2 prod=60.41 proto=60.39 temps={'card0': 48, 'card1': 41}
+   POSTARMS r3 prod=60.41 proto=60.41 temps={'card0': 48, 'card1': 41}
+   POSTARMS r4 prod=60.46 proto=60.41 temps={'card0': 49, 'card1': 41}
+   POSTARMS MEDIAN K=5120 N=8192 prod=60.43 proto=60.41  prod-proto=+0.03 us
+   DELTA-after-arms prod=-0.03 proto=-0.05 us
+== K=5120 N=7168 ==
+   CLEAN r0 prod=58.10 proto=58.11 temps={'card0': 48, 'card1': 41}
+   CLEAN r1 prod=58.09 proto=58.10 temps={'card0': 48, 'card1': 41}
+   CLEAN r2 prod=58.11 proto=58.11 temps={'card0': 48, 'card1': 41}
+   CLEAN r3 prod=58.81 proto=58.81 temps={'card0': 48, 'card1': 41}
+   CLEAN r4 prod=58.80 proto=58.80 temps={'card0': 48, 'card1': 41}
+   CLEAN MEDIAN K=5120 N=7168 prod=58.11 proto=58.11  prod-proto=+0.00 us
+   (heavy arms done: wiring=1.22e-04 ulp_rms=0.0205)
+   POSTARMS r0 prod=58.81 proto=58.77 temps={'card0': 48, 'card1': 41}
+   POSTARMS r1 prod=58.78 proto=58.76 temps={'card0': 49, 'card1': 41}
+   POSTARMS r2 prod=58.80 proto=58.75 temps={'card0': 49, 'card1': 41}
+   POSTARMS r3 prod=58.79 proto=58.79 temps={'card0': 49, 'card1': 41}
+   POSTARMS r4 prod=58.81 proto=58.74 temps={'card0': 49, 'card1': 41}
+   POSTARMS MEDIAN K=5120 N=7168 prod=58.80 proto=58.76  prod-proto=+0.04 us
+   DELTA-after-arms prod=+0.69 proto=+0.65 us
+CONTAM-DONE

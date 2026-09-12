@@ -1,0 +1,59 @@
+#### loader       landed line 123   DIFFERS
+   --- fence
+   +++ landed
+   @@ -36,5 +36,6 @@
+        _P2_OK = False       # default-safe: dispatch falls through to gptq_gemm_out
+   -# Pure-python hit log: proves P2 actually fired, per shape. Same pattern as
+   -# _shape_seen -- list append only, dynamo-safe (no torch call returning a
+   -# non-Tensor inside the traced region).
+   +# Pure-python hit log: proves P2 actually fired, per shape. Appended INSIDE the
+   +# op impl, so a hit is a real dispatch at execution time -- not a trace-time
+   +# branch visit, which is what made G-P3's dispatch invisible from Python.
+   +# Same pattern as _shape_seen -- list append only, dynamo-safe.
+    _P2_HITS: list = []
+   @@ -55 +56,4 @@
+                and c.act_type is torch.float16)
+   +
+   +
+   +def _p2_w4a16_gemm_impl(x: torch.Tensor, w_q: torch.Tensor, w_s: torch.Tensor,
+#### registration landed line 181   IDENTICAL
+#### warm-up      landed line 378   DIFFERS
+   --- fence
+   +++ landed
+   @@ -8,2 +8,3 @@
+            self._p2_part = None
+   +        self._p2_route = False
+            if _p2_layer_ok(c, K_dim, N_dim):
+   @@ -11,2 +12,3 @@
+                                             dtype=torch.float32, device=device)
+   +            self._p2_route = True
+                # (1, N) not (N,): the op reads out.shape[1] for N.
+   @@ -17 +19,3 @@
+                torch.cuda.synchronize()
+   +
+   +    def apply_weights(
+#### route        landed line 449   DIFFERS
+   --- fence
+   +++ landed
+   @@ -1,9 +1,13 @@
+   -        if (M == 1 and self._p2_part is not None
+   -                and os.environ.get("VLLM_WNA16_P2_GEMV", "1") == "1"
+   -                and _p2_layer_ok(c, K_dim, N_dim)):
+   -            # p2_reduce WRITES out[n] for every n, so unlike the fused ExLlama
+   -            # kernel (atomicAdd into c) this needs no c_out.zero_() first.
+   -            _P2_HITS.append((int(K_dim), int(N_dim)))
+   -            output = torch.ops.vllm.p2_w4a16_gemm(
+   -                x_2d, w_q, w_s, w_zp, self._p2_part, c_out)
+   +        if self._p2_route:
+   +            # No M here on purpose: a shape test in this function is folded at
+   +            # trace time (G-P3). The op decides, at runtime, between the P2 GEMV
+   +            # and the fused incumbent, and writes the result into c_out.
+   +            torch.ops.vllm.p2_gemv_or_fused(
+   +                x_2d, w_q, w_s, w_zp, w_g_idx, self._p2_part, c_out, temp_dq,
+   +                bits)
+   +            output = c_out
+            elif os.environ.get("VLLM_WNA16_EXL_DEBUG") == "legacy":
+   +            output = ops.gptq_gemm(
+   +                x_2d, w_q, w_zp, w_s, w_g_idx, True, True, bits)
+   +        else:
+   +            # The fused kernel accumulates into c via atomicAdd; upstream

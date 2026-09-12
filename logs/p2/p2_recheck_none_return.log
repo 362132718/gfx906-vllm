@@ -1,0 +1,59 @@
+GATE2-BEGIN 2026-09-10T00:26:52+08:00
+P2 route gate (G-P2): _P2_OK=True lib=True splitk=10 shapes=[(5120, 7168), (5120, 8192)] seed=7
+== row A probe ==
+   probe _P2_OK                       ok   loader found p2_gemv
+   ops registered                     ok   p2_w4a16_gemm + p2_gemv_or_fused (the latter is what apply_weights calls since the G-P3 fix)
+   part allocated 5120/8192           ok   (10, 8192)
+   part allocated 5120/7168           ok   (10, 7168)
+   part skipped 5120/17408            ok   None
+   part skipped 5120/8704             ok   None
+   part skipped 5120/3072             ok   None
+== row B op==ctypes ==
+   op==ctypes bit-equal 5120/8192     ok   equal=True n_diff=0 max=0.0e+00 hits=1 last=(5120, 8192)
+   P2 bit-stable x4 5120/8192         ok   n_diff=[0, 0, 0, 0]
+   op==ctypes bit-equal 5120/7168     ok   equal=True n_diff=0 max=0.0e+00 hits=1 last=(5120, 7168)
+   P2 bit-stable x4 5120/7168         ok   n_diff=[0, 0, 0, 0]
+== row C M=2 ==
+   M=2 no P2 hit                      ok   hits=0
+   M=2 in incumbent band              ok   max|d|=4.688e-02 <= tol=9.375e-02 (sigma_inc=4.688e-02, tol=6.0 ULP@|max|=21.8)
+   M=2 == gptq_gemm_out               ok   n_diff=12085 max|d|=3.906e-02 <= tol=9.375e-02
+== row D off-list ==
+   5120/17408 off-list skipped        ok   part=False hits=0
+   5120/17408 unchanged vs off        ok   n_diff=12590/17408 max|d|=3.516e-02 <= tol=9.375e-02 (sigma_inc=3.906e-02)
+   5120/8704 off-list skipped         ok   part=False hits=0
+   5120/8704 unchanged vs off         ok   n_diff=6928/8704 max|d|=3.906e-02 <= tol=9.375e-02 (sigma_inc=4.688e-02)
+   5120/3072 off-list skipped         ok   part=False hits=0
+   5120/3072 unchanged vs off         ok   n_diff=2438/3072 max|d|=4.688e-02 <= tol=9.375e-02 (sigma_inc=3.125e-02)
+== row E kill-switch ==
+   kill-switch: no hits               ok   off=0 default=1 on=2
+   switch changes kernel              ok   n_diff=6331/8192 max|d|=4.688e-02
+   switch output finite               ok   
+== row F predicate ==
+   five shapes hit-count exact        ok   want={(5120, 8192): 1, (5120, 7168): 1, (5120, 17408): 0, (5120, 8704): 0, (5120, 3072): 0} got={(5120, 8192): 1, (5120, 7168): 1, (5120, 17408): 0, (5120, 8704): 0, (5120, 3072): 0}
+== row G capture ==
+   capture 5120/8192                  ok   replay_stable=True rewrote_poison=True ==eager=True hits_in_capture=2 aliases_slab=True
+   capture 5120/7168                  ok   replay_stable=True rewrote_poison=True ==eager=True hits_in_capture=2 aliases_slab=True
+
+ROUTE ok
+G-P2 PASS
+ROUTE-GATE-DONE
+RC_GATE=0
+DYNPROBE-BEGIN 2026-09-10T00:26:53+08:00
+_P2_OK=True route-op=True
+[1] traced `x.shape[0] == 1` traced@130 called@1 -> True
+    NOTE: dynamo did NOT fold it here -- arm [3] is then the only thing that can explain G-P3, read it carefully
+--- regime: specialize_int=True ---
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1446: UserWarning: vllm::p2_w4a16_gemm (with implementation in ???): The output of this custom operator (1) must not also be an input to this custom operator and (2) may not alias any inputs to this custom operator or other returns. The most common way to trigger this error is if we have y = custom_op(x) and y and x are the same Tensor. Please instead return a clone of the offending output tensor(s) (e.g. return x.clone()) or refactor the custom operator to not return y. This is deprecated and will become an error in a future version of PyTorch.
+  return fn(*args, **kwargs)
+   [2] OLD route: eager@M=1 fired=True | compiled traced@130: M=1 fired=True M=8 fired=False
+      -> traced-region shape test DOES survive it
+   [3] NEW route: eager@M=1 fired=True | compiled traced@130: M=1 fired=True M=8 fired=False
+      compiled@M=1 == eager@M=1 bit-for-bit: True (n_diff=0 max=0.0e+00)
+--- regime: specialize_int=False ---
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1446: UserWarning: vllm::p2_w4a16_gemm (with implementation in ???): The output of this custom operator (1) must not also be an input to this custom operator and (2) may not alias any inputs to this custom operator or other returns. The most common way to trigger this error is if we have y = custom_op(x) and y and x are the same Tensor. Please instead return a clone of the offending output tensor(s) (e.g. return x.clone()) or refactor the custom operator to not return y. This is deprecated and will become an error in a future version of PyTorch.
+  return fn(*args, **kwargs)
+   [2] OLD route: eager@M=1 fired=True | compiled traced@130: M=1 fired=True M=8 fired=False
+      -> traced-region shape test DOES survive it
+   [3] NEW route: eager@M=1 fired=True | compiled traced@130: M=1 fired=True M=8 fired=False
+      compiled@M=1 == eager@M=1 bit-for-bit: True (n_diff=0 max=0.0e+00)
+RC_DYN=0

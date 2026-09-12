@@ -1,0 +1,38 @@
+[
+ {
+  "K": 5120,
+  "N": 8192,
+  "splitk": 10,
+  "wire": 0.0001221,
+  "ulp_rms": 0.0292,
+  "ulp_mean": 0.0009,
+  "ulp_max": 1,
+  "eager_us": 51.93,
+  "graph_us": 60.42,
+  "task0_us": 60.53,
+  "drift": 0.0018,
+  "rewrote_poison": true,
+  "replay_stable": true,
+  "bit_equal": true,
+  "n_diff": 0,
+  "max_diff_ulp": 0.0
+ },
+ {
+  "K": 5120,
+  "N": 7168,
+  "splitk": 10,
+  "wire": 0.0001221,
+  "ulp_rms": 0.0205,
+  "ulp_mean": 0.0004,
+  "ulp_max": 1,
+  "eager_us": 49.87,
+  "graph_us": 58.83,
+  "task0_us": 58.22,
+  "drift": 0.0104,
+  "rewrote_poison": true,
+  "replay_stable": true,
+  "bit_equal": true,
+  "n_diff": 0,
+  "max_diff_ulp": 0.0
+ }
+]

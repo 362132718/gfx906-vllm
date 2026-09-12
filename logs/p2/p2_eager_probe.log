@@ -1,0 +1,238 @@
+patch active | _P2_OK=True SPLITK=10 shapes=[(5120, 7168), (5120, 8192)]
+WARNING 09-09 15:12:19 [profiler.py:171] Using 'torch' profiler with delay_iterations or max_iterations while ignore_frontend is False may result in high overhead.
+INFO 09-09 15:12:19 [api_utils.py:272] non-default args: {'dtype': 'float16', 'max_model_len': 16384, 'tensor_parallel_size': 2, 'gpu_memory_utilization': 0.9, 'max_num_seqs': 48, 'disable_log_stats': True, 'enforce_eager': True, 'disable_custom_all_reduce': True, 'limit_mm_per_prompt': {'image': 1, 'video': 1}, 'mm_encoder_attn_backend': 'TRITON_ATTN', 'profiler_config': ProfilerConfig(profiler='torch', torch_profiler_dir='/work/p2/eager/prof', proton_profiler_dir='', proton_context='shadow', proton_data='tree', proton_backend=None, proton_mode=None, proton_hook=None, proton_output_format=None, torch_profiler_with_stack=False, torch_profiler_with_flops=False, torch_profiler_use_gzip=True, torch_profiler_dump_cuda_time_total=True, torch_profiler_record_shapes=False, torch_profiler_with_memory=False, capture_torch_profiler=False, detailed_trace_annotation=False, ignore_frontend=False, delay_iterations=4, max_iterations=8, warmup_iterations=0, active_iterations=5, wait_iterations=0), 'attention_backend': 'TRITON_ATTN', 'model': '/home/x/models/vllm/Qwen3.8-27B-OBLITERATED-AWQ-W4A16'}
+WARNING 09-09 15:12:19 [envs.py:2213] Unknown vLLM environment variable detected: VLLM_TRITON_ATTN_NUM_SEGMENTS
+WARNING 09-09 15:12:19 [envs.py:2213] Unknown vLLM environment variable detected: VLLM_WNA16_EXL_SHAPEDBG
+INFO 09-09 15:12:29 [model.py:672] Resolved architecture: Qwen3_5ForConditionalGeneration
+WARNING 09-09 15:12:29 [model.py:2299] Casting torch.bfloat16 to torch.float16.
+INFO 09-09 15:12:29 [model.py:1965] Using max model len 16384
+WARNING 09-09 15:12:29 [model.py:963] Model does not support mm_device_do_normalize, forcing mm_device_do_normalize = False.
+INFO 09-09 15:12:30 [scheduler.py:242] Chunked prefill is enabled with max_num_batched_tokens=8192.
+INFO 09-09 15:12:30 [config.py:605] Mamba cache mode is set to 'align' for Qwen3_5ForConditionalGeneration by default when prefix caching is enabled
+WARNING 09-09 15:12:30 [vllm.py:1285] Enforce eager set, disabling torch.compile and CUDAGraphs. This is equivalent to setting -cc.mode=none -cc.cudagraph_mode=none
+WARNING 09-09 15:12:30 [vllm.py:1354] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+INFO 09-09 15:12:30 [kernel.py:308] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'])
+INFO 09-09 15:12:30 [vllm.py:1533] Cudagraph is disabled under eager mode
+INFO 09-09 15:12:30 [compilation.py:329] Enabled custom fusions: norm_quant, act_quant
+[transformers] The `use_fast` parameter is deprecated and will be removed in a future version. Use `backend="torchvision"` instead of `use_fast=True`, or `backend="pil"` instead of `use_fast=False`.
+WARNING 09-09 15:12:39 [system_utils.py:157] We must use the `spawn` multiprocessing start method. Overriding VLLM_WORKER_MULTIPROC_METHOD to 'spawn'. See https://docs.vllm.ai/en/latest/usage/troubleshooting.html#python-multiprocessing for more information. Reasons: CUDA is initialized
+WARNING 09-09 15:12:39 [rocm.py:134] Using CUDA_VISIBLE_DEVICES on ROCm is deprecated and support will be removed in vLLM v0.26.0. Please use HIP_VISIBLE_DEVICES instead.
+WARNING 09-09 15:12:41 [rocm.py:134] Using CUDA_VISIBLE_DEVICES on ROCm is deprecated and support will be removed in vLLM v0.26.0. Please use HIP_VISIBLE_DEVICES instead.
+(EngineCore pid=10471) INFO 09-09 15:12:48 [core.py:122] Initializing a V1 LLM engine (v0.28.0) with config: model='/home/x/models/vllm/Qwen3.8-27B-OBLITERATED-AWQ-W4A16', speculative_config=None, tokenizer='/home/x/models/vllm/Qwen3.8-27B-OBLITERATED-AWQ-W4A16', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.float16, max_seq_len=16384, download_dir=None, load_format=auto, tensor_parallel_size=2, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=compressed-tensors, quantization_config=None, enforce_eager=True, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=/home/x/models/vllm/Qwen3.8-27B-OBLITERATED-AWQ-W4A16, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['+sparse_attn_indexer', 'all'], 'ir_enable_torch_wrap': False, 'splitting_ops': [], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [8192], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.NONE: 0>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': [], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 0, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, enable_jit_warmup=True, enable_bf16x3_router_gemm=False, moe_backend='auto', linear_backend='auto')
+(EngineCore pid=10471) INFO 09-09 15:12:48 [multiproc_executor.py:150] DP group leader: node_rank=0, node_rank_within_dp=0, master_addr=127.0.0.1, mq_connect_ip=172.17.0.2 (local), world_size=2, local_world_size=2
+WARNING 09-09 15:12:50 [rocm.py:134] Using CUDA_VISIBLE_DEVICES on ROCm is deprecated and support will be removed in vLLM v0.26.0. Please use HIP_VISIBLE_DEVICES instead.
+WARNING 09-09 15:12:50 [rocm.py:134] Using CUDA_VISIBLE_DEVICES on ROCm is deprecated and support will be removed in vLLM v0.26.0. Please use HIP_VISIBLE_DEVICES instead.
+(Worker pid=10542) INFO 09-09 15:12:58 [parallel_state.py:1638] world_size=2 rank=0 local_rank=0 distributed_init_method=file:///tmp/vllm_dist_a81ccb4a2e8a466fa672ba7da5658c88 backend=nccl
+(Worker pid=10543) INFO 09-09 15:12:58 [parallel_state.py:1638] world_size=2 rank=1 local_rank=1 distributed_init_method=file:///tmp/vllm_dist_a81ccb4a2e8a466fa672ba7da5658c88 backend=nccl
+(Worker pid=10542) INFO 09-09 15:12:58 [pynccl.py:113] vLLM is using nccl==2.27.7
+(Worker pid=10542) INFO 09-09 15:12:59 [cuda_communicator.py:266] Using ['PYNCCL'] all-reduce backends (in dispatch order) for group 'tp:0' out of potential backends: ['NCCL_SYMM_MEM', 'QUICK_REDUCE', 'FLASHINFER', 'AITER_CUSTOM', 'CUSTOM', 'SYMM_MEM', 'PYNCCL'].
+(Worker pid=10542) INFO 09-09 15:12:59 [parallel_state.py:1982] rank 0 in world size 2 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A, EPLB rank N/A
+(Worker pid=10542) [transformers] The `use_fast` parameter is deprecated and will be removed in a future version. Use `backend="torchvision"` instead of `use_fast=True`, or `backend="pil"` instead of `use_fast=False`.
+(Worker pid=10543) [transformers] The `use_fast` parameter is deprecated and will be removed in a future version. Use `backend="torchvision"` instead of `use_fast=True`, or `backend="pil"` instead of `use_fast=False`.
+(Worker_TP0 pid=10542) INFO 09-09 15:13:06 [gpu_model_runner.py:5419] Starting to load model /home/x/models/vllm/Qwen3.8-27B-OBLITERATED-AWQ-W4A16...
+(Worker_TP0 pid=10542) INFO 09-09 15:13:06 [rocm.py:772] Using backend AttentionBackendEnum.TRITON_ATTN for vit attention
+(Worker_TP0 pid=10542) WARNING 09-09 15:13:06 [activation.py:808] [ROCm] PyTorch's native GELU with tanh approximation is unstable. Falling back to GELU(approximate='none').
+(Worker_TP0 pid=10542) INFO 09-09 15:13:06 [mm_encoder_attention.py:375] Using AttentionBackendEnum.TRITON_ATTN for MMEncoderAttention.
+(Worker_TP1 pid=10543) INFO 09-09 15:13:06 [compressed_tensors_wNa16.py:137] Using TritonW4A16LinearKernel for CompressedTensorsWNA16
+(Worker_TP0 pid=10542) INFO 09-09 15:13:06 [compressed_tensors_wNa16.py:137] Using TritonW4A16LinearKernel for CompressedTensorsWNA16
+(Worker_TP0 pid=10542) INFO 09-09 15:13:06 [qwen_gdn_linear_attn.py:158] Using Triton/FLA GDN prefill kernel (requested=auto, head_k_dim=128).
+(Worker_TP0 pid=10542) INFO 09-09 15:13:06 [qwen_gdn_linear_attn.py:500] Falling back to the Triton GDN decode path: the fused CUDA kernel requires a BF16 GDN model with K=V=128, SiLU gating, non-interleaved GQA layout, BF16 convolution cache, BF16 or FP32 recurrent state, and a GPU with compute capability 8.0+
+(Worker_TP0 pid=10542) INFO 09-09 15:13:06 [qwen_gdn_linear_attn.py:505] GDN decode kernel: triton
+(Worker_TP0 pid=10542) INFO 09-09 15:13:06 [rocm.py:669] Using TRITON_ATTN backend (selected via --attention-backend).
+(Worker_TP0 pid=10542) WARNING 09-09 15:13:07 [compilation.py:1348] Op 'sparse_attn_indexer' not present in model, enabling with '+sparse_attn_indexer' has no effect
+(Worker_TP0 pid=10542) INFO 09-09 15:13:07 [weight_utils.py:858] Filesystem type for checkpoints: EXT4. Checkpoint size: 18.21 GiB. Available RAM: 37.29 GiB.
+(Worker_TP0 pid=10542) INFO 09-09 15:13:07 [weight_utils.py:881] Auto-prefetch is disabled because the filesystem (EXT4) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
+(Worker_TP0 pid=10542) Loading safetensors checkpoint shards:   0% Completed | 0/2 [00:00<?, ?it/s]
+(Worker_TP0 pid=10542) Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:05<00:00,  2.98s/it]
+(Worker_TP0 pid=10542) Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:05<00:00,  2.98s/it]
+(Worker_TP0 pid=10542) 
+(Worker_TP0 pid=10542) INFO 09-09 15:13:13 [default_loader.py:430] Loading weights took 6.32 seconds
+(Worker_TP1 pid=10543) INFO 09-09 15:13:24 [interface.py:911] Setting attention block size to 784 tokens to ensure that attention page size is >= mamba page size.
+(Worker_TP1 pid=10543) INFO 09-09 15:13:24 [interface.py:935] Padding mamba page size by 0.13% to ensure that mamba page size and attention page size are exactly equal.
+(Worker_TP0 pid=10542) INFO 09-09 15:13:24 [gpu_model_runner.py:5515] Model loading took 8.91 GiB memory and 17.544546 seconds
+(Worker_TP0 pid=10542) INFO 09-09 15:13:24 [interface.py:911] Setting attention block size to 784 tokens to ensure that attention page size is >= mamba page size.
+(Worker_TP0 pid=10542) INFO 09-09 15:13:24 [interface.py:935] Padding mamba page size by 0.13% to ensure that mamba page size and attention page size are exactly equal.
+(EngineCore pid=10471) INFO 09-09 15:13:24 [torch_utils.py:262] Reducing Torch threads from 6 to 1 for serving. Set OMP_NUM_THREADS in the external environment to override.
+(Worker_TP0 pid=10542) INFO 09-09 15:13:25 [gpu_model_runner.py:6590] Encoder cache will be initialized with a budget of 16384 tokens, and profiled with 1 image items of the maximum feature size.
+(EngineCore pid=10471) INFO 09-09 15:14:25 [shm_broadcast.py:801] No available shared memory broadcast block found in 60 seconds. This typically happens when some processes are hanging or doing some time-consuming work (e.g. compilation, weight/kv cache quantization).
+(EngineCore pid=10471) INFO 09-09 15:15:26 [shm_broadcast.py:801] No available shared memory broadcast block found in 60 seconds. This typically happens when some processes are hanging or doing some time-consuming work (e.g. compilation, weight/kv cache quantization).
+(EngineCore pid=10471) INFO 09-09 15:16:26 [shm_broadcast.py:801] No available shared memory broadcast block found in 60 seconds. This typically happens when some processes are hanging or doing some time-consuming work (e.g. compilation, weight/kv cache quantization).
+(EngineCore pid=10471) INFO 09-09 15:17:26 [shm_broadcast.py:801] No available shared memory broadcast block found in 60 seconds. This typically happens when some processes are hanging or doing some time-consuming work (e.g. compilation, weight/kv cache quantization).
+(EngineCore pid=10471) INFO 09-09 15:18:26 [shm_broadcast.py:801] No available shared memory broadcast block found in 60 seconds. This typically happens when some processes are hanging or doing some time-consuming work (e.g. compilation, weight/kv cache quantization).
+(Worker_TP1 pid=10543) /usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py:83: FutureWarning: `torch.distributed.all_gather_into_tensor` is deprecated. Please use `torch.distributed.all_gather_single` instead.
+(Worker_TP1 pid=10543)   return func(*args, **kwargs)
+(Worker_TP0 pid=10542) /usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py:83: FutureWarning: `torch.distributed.all_gather_into_tensor` is deprecated. Please use `torch.distributed.all_gather_single` instead.
+(Worker_TP0 pid=10542)   return func(*args, **kwargs)
+(Worker_TP0 pid=10542) INFO 09-09 15:18:54 [gpu_worker.py:578] Available KV cache memory: 3.45 GiB
+(EngineCore pid=10471) INFO 09-09 15:18:54 [kv_cache_utils.py:1869] GPU KV cache size: 87,381 tokens, Maximum concurrency for 16,384 tokens per request: 5.33x
+(Worker_TP1 pid=10543) INFO 09-09 15:18:54 [qwen_triton_warmup.py:270] Warming up Qwen Triton kernels for model_type=qwen3_5_text.
+(Worker_TP0 pid=10542) INFO 09-09 15:18:54 [qwen_triton_warmup.py:270] Warming up Qwen Triton kernels for model_type=qwen3_5_text.
+(Worker_TP1 pid=10543) INFO 09-09 15:18:54 [ll_bf16.py:30] cuteDSL (CUTLASS Python) not available, ll_bf16_gemm disabled
+(Worker_TP0 pid=10542) INFO 09-09 15:18:54 [ll_bf16.py:30] cuteDSL (CUTLASS Python) not available, ll_bf16_gemm disabled
+(Worker_TP1 pid=10543) INFO 09-09 15:18:54 [gpu_worker.py:804] Free memory on device (15.63/15.98 GiB) on startup. Desired GPU memory utilization is (0.9, 14.39 GiB). Actual usage is 9.53 GiB for consumed memory (weights + non-torch), 1.41 GiB for peak activation, and 0.0 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=3546339636` (3.3 GiB) to fit into requested memory, or `--kv-cache-memory=4885161472` (4.55 GiB) to fully utilize gpu memory. Current kv cache memory in use is 3.45 GiB.
+(Worker_TP0 pid=10542) INFO 09-09 15:18:54 [gpu_worker.py:804] Free memory on device (15.63/15.98 GiB) on startup. Desired GPU memory utilization is (0.9, 14.39 GiB). Actual usage is 9.53 GiB for consumed memory (weights + non-torch), 1.41 GiB for peak activation, and 0.0 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=3546339636` (3.3 GiB) to fit into requested memory, or `--kv-cache-memory=4885161472` (4.55 GiB) to fully utilize gpu memory. Current kv cache memory in use is 3.45 GiB.
+(Worker_TP1 pid=10543) INFO 09-09 15:18:55 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(Worker_TP0 pid=10542) INFO 09-09 15:18:55 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(Worker_TP0 pid=10542) INFO 09-09 15:18:55 [torch_utils.py:262] Reducing Torch threads from 6 to 1 for serving. Set OMP_NUM_THREADS in the external environment to override.
+(EngineCore pid=10471) INFO 09-09 15:18:55 [core.py:354] init engine (profile, create kv cache, warmup model) took 330.46 s
+(EngineCore pid=10471) [transformers] The `use_fast` parameter is deprecated and will be removed in a future version. Use `backend="torchvision"` instead of `use_fast=True`, or `backend="pil"` instead of `use_fast=False`.
+(EngineCore pid=10471) WARNING 09-09 15:19:03 [vllm.py:1285] Enforce eager set, disabling torch.compile and CUDAGraphs. This is equivalent to setting -cc.mode=none -cc.cudagraph_mode=none
+(EngineCore pid=10471) WARNING 09-09 15:19:03 [vllm.py:1354] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+(EngineCore pid=10471) INFO 09-09 15:19:03 [kernel.py:308] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'])
+(EngineCore pid=10471) INFO 09-09 15:19:03 [vllm.py:1533] Cudagraph is disabled under eager mode
+(EngineCore pid=10471) INFO 09-09 15:19:03 [compilation.py:329] Enabled custom fusions: norm_quant, act_quant
+INFO 09-09 15:19:04 [hf.py:551] Detected the chat template content format to be 'openai'. You can set `--chat-template-content-format` to override this.
+[transformers] Qwen3VL video processing does not apply the per-frame pixel cap the reference implementation (qwen-vl-utils) applies, so some videos cost far more tokens than they would there. In v5.22 the capped behavior will become the default and `cap_pixels_per_frame` will be removed. Pass `cap_pixels_per_frame=True` to adopt the reference behavior now, or `False` to keep the current behavior and silence this warning.
+INFO 09-09 15:19:20 [base.py:235] Multi-modal warmup completed in 16.105s
+INFO 09-09 15:19:21 [base.py:235] Readonly multi-modal warmup completed in 1.587s
+engine up in 422 s (eager)
+(Worker_TP0 pid=10542) WARNING 09-09 15:19:22 [jit_monitor.py:141] Triton kernel JIT compilation during inference: triton_w4a16_gemm_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(Worker_TP0 pid=10542) WARNING 09-09 15:19:22 [jit_monitor.py:141] Triton kernel JIT compilation during inference: layer_norm_fwd_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(Worker_TP0 pid=10542) WARNING 09-09 15:19:22 [jit_monitor.py:141] Triton kernel JIT compilation during inference: _triton_mrope_forward. This causes a latency spike; consider extending warmup to cover this shape/config.
+(Worker_TP0 pid=10542) WARNING 09-09 15:19:22 [jit_monitor.py:141] Triton kernel JIT compilation during inference: kernel_unified_attention. This causes a latency spike; consider extending warmup to cover this shape/config.
+(Worker_TP0 pid=10542) WARNING 09-09 15:19:23 [jit_monitor.py:141] Triton kernel JIT compilation during inference: _causal_conv1d_update_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(Worker_TP0 pid=10542) WARNING 09-09 15:19:23 [jit_monitor.py:141] Triton kernel JIT compilation during inference: fused_recurrent_gated_delta_rule_packed_decode_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(Worker_TP0 pid=10542) WARNING 09-09 15:19:23 [jit_monitor.py:141] Triton kernel JIT compilation during inference: reduce_segments. This causes a latency spike; consider extending warmup to cover this shape/config.
+(Worker_TP0 pid=10542) INFO 09-09 15:19:26 [wrapper.py:32] GPU profiling will start 4 steps after start_profile.
+(Worker_TP0 pid=10542) INFO 09-09 15:19:26 [wrapper.py:39] GPU profiling will stop after 8 worker steps, or when stop_profile is received.
+(Worker_TP0 pid=10542) INFO 09-09 15:19:26 [wrapper.py:189] Torch profiling enabled. Traces will be saved to: /work/p2/eager/prof
+(Worker_TP0 pid=10542) INFO 09-09 15:19:26 [wrapper.py:110] Starting profiler after delay...
+USDT:2026-09-09 15:19:26 10543:10543 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-09-09 15:19:26 10542:10542 SyncActivityProfilerHandler.cpp:52] profiler_start
+(Worker_TP0 pid=10542) INFO 09-09 15:19:28 [wrapper.py:126] Max profiling iterations reached. Stopping profiler...
+USDT:2026-09-09 15:19:28 10542:10542 SyncActivityProfilerHandler.cpp:59] profiler_stop
+USDT:2026-09-09 15:19:28 10543:10543 SyncActivityProfilerHandler.cpp:59] profiler_stop
+(Worker_TP0 pid=10542) -------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+(Worker_TP0 pid=10542)                                                    Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg    # of Calls  
+(Worker_TP0 pid=10542) -------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+(Worker_TP0 pid=10542)                    execute_context_0(0)_generation_1(1)         0.00%       0.000us         0.00%       0.000us       0.000us        1.463s       106.62%        1.463s     182.826ms             8  
+(Worker_TP0 pid=10542)                             triton_w4a16_gemm_kernel.kd         0.00%       0.000us         0.00%       0.000us       0.000us        1.183s        86.20%        1.183s     577.407us          2048  
+(Worker_TP0 pid=10542) ncclDevKernel_Generic_4(ncclDevKernelArgsStorage<409...         0.00%       0.000us         0.00%       0.000us       0.000us      57.161ms         4.17%      57.161ms      54.962us          1040  
+(Worker_TP0 pid=10542)                                        vllm::all_reduce         2.41%      39.248ms         4.80%      78.184ms      75.760us      56.371ms         4.11%      56.371ms      54.623us          1032  
+(Worker_TP0 pid=10542)                                             aten::copy_         3.07%      49.954ms        14.84%     241.793ms      36.415us      35.058ms         2.56%      35.068ms       5.281us          6640  
+(Worker_TP0 pid=10542)                                  hipPointerGetAttribute         0.63%      10.201ms         0.63%      10.201ms       0.476us      25.115ms         1.83%      25.115ms       1.171us         21440  
+(Worker_TP0 pid=10542) void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us      18.858ms         1.37%      18.858ms       5.227us          3608  
+(Worker_TP0 pid=10542)                                               aten::add         1.91%      31.099ms         7.70%     125.568ms      34.421us      18.187ms         1.33%      18.187ms       4.985us          3648  
+(Worker_TP0 pid=10542)                                               aten::mul         1.32%      21.436ms         6.96%     113.369ms      41.926us      14.947ms         1.09%      14.947ms       5.528us          2704  
+(Worker_TP0 pid=10542)                                              aten::mean         0.75%      12.194ms         2.68%      43.729ms      33.951us      14.028ms         1.02%      14.028ms      10.892us          1288  
+(Worker_TP0 pid=10542) void at::native::reduce_kernel<512, 1, at::native::R...         0.00%       0.000us         0.00%       0.000us       0.000us      14.028ms         1.02%      14.028ms      10.892us          1288  
+(Worker_TP0 pid=10542)                                          _rocm_C::LLMM1         0.21%       3.493ms         1.91%      31.082ms      79.292us      13.993ms         1.02%      13.993ms      35.697us           392  
+(Worker_TP0 pid=10542) void LLGemm1_kernel<c10::Half, 4>(c10::Half const*, ...         0.00%       0.000us         0.00%       0.000us       0.000us      13.993ms         1.02%      13.993ms      35.697us           392  
+(Worker_TP0 pid=10542) void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us      12.829ms         0.94%      12.829ms       4.980us          2576  
+(Worker_TP0 pid=10542) void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us      11.634ms         0.85%      11.634ms       5.032us          2312  
+(Worker_TP0 pid=10542) void at::native::elementwise_kernel_manual_unroll<12...         0.00%       0.000us         0.00%       0.000us       0.000us       9.327ms         0.68%       9.327ms       6.041us          1544  
+(Worker_TP0 pid=10542)                           vllm::qwen_gdn_attention_core         4.66%      76.014ms         8.30%     135.198ms     352.079us       6.864ms         0.50%       6.864ms      17.876us           384  
+(Worker_TP0 pid=10542)                                             aten::rsqrt         0.57%       9.234ms         3.45%      56.282ms      43.698us       6.535ms         0.48%       6.535ms       5.074us          1288  
+(Worker_TP0 pid=10542) void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us       6.535ms         0.48%       6.535ms       5.074us          1288  
+(Worker_TP0 pid=10542)                                               aten::pow         0.73%      11.947ms         2.67%      43.466ms      33.747us       6.496ms         0.47%       6.496ms       5.044us          1288  
+(Worker_TP0 pid=10542) void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us       6.496ms         0.47%       6.496ms       5.044us          1288  
+(Worker_TP0 pid=10542) void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us       5.208ms         0.38%       5.208ms       5.086us          1024  
+(Worker_TP0 pid=10542)                                   hipModuleLaunchKernel        10.43%     170.000ms        10.43%     170.000ms      45.503us       5.186ms         0.38%       5.186ms       1.388us          3736  
+(Worker_TP0 pid=10542) void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us       5.002ms         0.36%       5.002ms       4.847us          1032  
+(Worker_TP0 pid=10542) fused_recurrent_gated_delta_rule_packed_decode_kerne...         0.00%       0.000us         0.00%       0.000us       0.000us       4.668ms         0.34%       4.668ms      12.156us           384  
+(Worker_TP0 pid=10542)                                        _C::silu_and_mul         0.32%       5.177ms         1.92%      31.323ms      61.177us       3.912ms         0.29%       3.912ms       7.640us           512  
+(Worker_TP0 pid=10542) _ZN4vllm18act_and_mul_kernelIN3c104HalfE7__half2TnPF...         0.00%       0.000us         0.00%       0.000us       0.000us       3.912ms         0.29%       3.912ms       7.640us           512  
+(Worker_TP0 pid=10542)                     vllm::unified_attention_with_output         1.68%      27.326ms         2.10%      34.266ms     267.700us       3.762ms         0.27%       3.762ms      29.393us           128  
+(Worker_TP0 pid=10542) void at::native::elementwise_kernel_manual_unroll<12...         0.00%       0.000us         0.00%       0.000us       0.000us       3.562ms         0.26%       3.562ms       6.956us           512  
+(Worker_TP0 pid=10542)                             kernel_unified_attention.kd         0.00%       0.000us         0.00%       0.000us       0.000us       2.500ms         0.18%       2.500ms      19.528us           128  
+(Worker_TP0 pid=10542)                         _causal_conv1d_update_kernel.kd         0.00%       0.000us         0.00%       0.000us       0.000us       2.196ms         0.16%       2.196ms       5.719us           384  
+(Worker_TP0 pid=10542)                                             aten::fill_         0.25%       4.084ms         1.83%      29.759ms      61.998us       2.029ms         0.15%       2.029ms       4.227us           480  
+(Worker_TP0 pid=10542) void at::native::vectorized_elementwise_kernel<8, at...         0.00%       0.000us         0.00%       0.000us       0.000us       1.948ms         0.14%       1.948ms       5.074us           384  
+(Worker_TP0 pid=10542)                                layer_norm_fwd_kernel.kd         0.00%       0.000us         0.00%       0.000us       0.000us       1.948ms         0.14%       1.948ms       5.073us           384  
+(Worker_TP0 pid=10542)                                             aten::index         0.15%       2.462ms         0.79%      12.853ms      89.255us       1.284ms         0.09%       1.333ms       9.260us           144  
+(Worker_TP0 pid=10542)                                      reduce_segments.kd         0.00%       0.000us         0.00%       0.000us       0.000us       1.263ms         0.09%       1.263ms       9.865us           128  
+(Worker_TP0 pid=10542) void at::native::index_elementwise_kernel<128, 4, at...         0.00%       0.000us         0.00%       0.000us       0.000us       1.222ms         0.09%       1.222ms       8.988us           136  
+(Worker_TP0 pid=10542)                                           aten::sigmoid         0.12%       1.978ms         0.24%       3.849ms      30.071us     964.849us         0.07%     964.849us       7.538us           128  
+(Worker_TP0 pid=10542) void at::native::vectorized_elementwise_kernel<8, at...         0.00%       0.000us         0.00%       0.000us       0.000us     964.849us         0.07%     964.849us       7.538us           128  
+(Worker_TP0 pid=10542)                                      record_param_comms         0.04%     578.898us         0.08%       1.225ms     153.147us     789.760us         0.06%     789.760us      98.720us             8  
+(Worker_TP0 pid=10542)                                   nccl:_all_gather_base         0.00%       0.000us         0.00%       0.000us       0.000us     789.760us         0.06%     789.760us      98.720us             8  
+(Worker_TP0 pid=10542)                              __amd_rocclr_copyBuffer.kd         0.00%       0.000us         0.00%       0.000us       0.000us     757.776us         0.06%     757.776us       4.985us           152  
+(Worker_TP0 pid=10542)                           vllm::unified_kv_cache_update         0.84%      13.620ms         1.12%      18.317ms     143.100us     642.598us         0.05%     642.598us       5.020us           128  
+(Worker_TP0 pid=10542)                       reshape_and_cache_kernel_flash.kd         0.00%       0.000us         0.00%       0.000us       0.000us     642.598us         0.05%     642.598us       5.020us           128  
+(Worker_TP0 pid=10542) void at::native::vectorized_elementwise_kernel<8, at...         0.00%       0.000us         0.00%       0.000us       0.000us     617.956us         0.05%     617.956us       4.828us           128  
+(Worker_TP0 pid=10542)                                _triton_mrope_forward.kd         0.00%       0.000us         0.00%       0.000us       0.000us     548.356us         0.04%     548.356us       4.284us           128  
+(Worker_TP0 pid=10542)                                            aten::argmax         0.04%     623.416us         0.10%       1.552ms     194.055us     228.946us         0.02%     228.946us      28.618us             8  
+(Worker_TP0 pid=10542) void at::native::elementwise_kernel_manual_unroll<12...         0.00%       0.000us         0.00%       0.000us       0.000us     199.962us         0.01%     199.962us       4.999us            40  
+(Worker_TP0 pid=10542) void at::native::reduce_kernel<512, 1, at::native::R...         0.00%       0.000us         0.00%       0.000us       0.000us     192.633us         0.01%     192.633us      24.079us             8  
+(Worker_TP0 pid=10542) void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us     110.371us         0.01%     110.371us       3.449us            32  
+(Worker_TP0 pid=10542)                                               aten::sub         0.03%     449.978us         0.06%     950.804us      29.713us     103.010us         0.01%     103.010us       3.219us            32  
+(Worker_TP0 pid=10542)                                            aten::gather         0.02%     257.750us         0.04%     620.450us      25.852us     100.456us         0.01%     100.456us       4.186us            24  
+(Worker_TP0 pid=10542) void at::native::_scatter_gather_elementwise_kernel<...         0.00%       0.000us         0.00%       0.000us       0.000us     100.456us         0.01%     100.456us       4.186us            24  
+(Worker_TP0 pid=10542)                                      aten::floor_divide         0.01%     202.725us         0.04%     605.750us      25.240us      91.977us         0.01%      91.977us       3.832us            24  
+(Worker_TP0 pid=10542) void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us      91.977us         0.01%      91.977us       3.832us            24  
+(Worker_TP0 pid=10542)                                            aten::clamp_         0.01%     203.140us         0.03%     537.570us      22.399us      84.456us         0.01%      84.456us       3.519us            24  
+(Worker_TP0 pid=10542) void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us      84.456us         0.01%      84.456us       3.519us            24  
+(Worker_TP0 pid=10542)                                      aten::masked_fill_         0.00%      78.913us         0.01%     210.778us      26.347us      83.353us         0.01%      83.353us      10.419us             8  
+(Worker_TP0 pid=10542) void at::native::elementwise_kernel_manual_unroll<12...         0.00%       0.000us         0.00%       0.000us       0.000us      83.353us         0.01%      83.353us      10.419us             8  
+(Worker_TP0 pid=10542) void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us      76.937us         0.01%      76.937us       3.206us            24  
+(Worker_TP0 pid=10542)                                            aten::arange         0.01%     194.228us         0.07%       1.116ms      23.243us      65.418us         0.00%     130.836us       2.726us            48  
+(Worker_TP0 pid=10542) void (anonymous namespace)::elementwise_kernel_with_...         0.00%       0.000us         0.00%       0.000us       0.000us      65.418us         0.00%      65.418us       2.726us            24  
+(Worker_TP0 pid=10542)                                         hipEventDestroy         0.00%      32.280us         0.00%      32.280us       1.345us      62.238us         0.00%      62.238us       2.593us            24  
+(Worker_TP0 pid=10542) void at::native::index_elementwise_kernel<128, 4, at...         0.00%       0.000us         0.00%       0.000us       0.000us      61.113us         0.00%      61.113us       7.639us             8  
+(Worker_TP0 pid=10542)                         _compute_slot_mapping_kernel.kd         0.00%       0.000us         0.00%       0.000us       0.000us      59.673us         0.00%      59.673us       7.459us             8  
+(Worker_TP0 pid=10542)                                      aten::index_select         0.01%     133.775us         0.02%     311.300us      19.456us      49.752us         0.00%      49.752us       3.110us            16  
+(Worker_TP0 pid=10542) void at::native::(anonymous namespace)::indexSelectS...         0.00%       0.000us         0.00%       0.000us       0.000us      49.752us         0.00%      49.752us       6.219us             8  
+(Worker_TP0 pid=10542) void at::native::elementwise_kernel_manual_unroll<12...         0.00%       0.000us         0.00%       0.000us       0.000us      47.193us         0.00%      47.193us       5.899us             8  
+(Worker_TP0 pid=10542)                                 hipEventRecordWithFlags         0.04%     659.883us         0.04%     659.883us      16.497us      45.111us         0.00%      45.111us       1.128us            40  
+(Worker_TP0 pid=10542) void at::native::unrolled_elementwise_kernel<at::nat...         0.00%       0.000us         0.00%       0.000us       0.000us      41.272us         0.00%      41.272us       5.159us             8  
+(Worker_TP0 pid=10542) void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us      39.352us         0.00%      39.352us       4.919us             8  
+(Worker_TP0 pid=10542) void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us      39.192us         0.00%      39.192us       4.899us             8  
+(Worker_TP0 pid=10542)                       __amd_rocclr_fillBufferAligned.kd         0.00%       0.000us         0.00%       0.000us       0.000us      36.313us         0.00%      36.313us       4.539us             8  
+(Worker_TP0 pid=10542)                                    hipStreamIsCapturing         0.01%      95.123us         0.01%      95.123us       0.540us      31.676us         0.00%      31.676us       0.180us           176  
+(Worker_TP0 pid=10542)                                     hipEventSynchronize         0.24%       3.950ms         0.64%      10.414ms     650.886us      26.556us         0.00%     727.069us      45.442us            16  
+(Worker_TP0 pid=10542) triton_poi_fused_add_bitwise_and_bitwise_or_ge_lt_mu...         0.01%     176.645us         0.02%     299.440us      37.430us      26.552us         0.00%      26.552us       3.319us             8  
+(Worker_TP0 pid=10542) triton_poi_fused_add_bitwise_and_bitwise_or_ge_lt_mu...         0.00%       0.000us         0.00%       0.000us       0.000us      26.552us         0.00%      26.552us       3.319us             8  
+(Worker_TP0 pid=10542) void at::native::unrolled_elementwise_kernel<at::nat...         0.00%       0.000us         0.00%       0.000us       0.000us      26.073us         0.00%      26.073us       3.259us             8  
+(Worker_TP0 pid=10542) triton_poi_fused_bitwise_and_bitwise_not_bitwise_or_...         0.01%     105.063us         0.01%     224.898us      28.112us      24.633us         0.00%      24.633us       3.079us             8  
+(Worker_TP0 pid=10542) triton_poi_fused_bitwise_and_bitwise_not_bitwise_or_...         0.00%       0.000us         0.00%       0.000us       0.000us      24.633us         0.00%      24.633us       3.079us             8  
+(Worker_TP0 pid=10542)                                      hipStreamWaitEvent         0.00%      53.232us         0.00%      53.232us       6.654us      10.398us         0.00%      10.398us       1.300us             8  
+(Worker_TP0 pid=10542)                                 hipEventCreateWithFlags         0.00%      22.461us         0.00%      22.461us       0.936us       9.918us         0.00%       9.918us       0.413us            24  
+(Worker_TP0 pid=10542)                    execute_context_0(0)_generation_1(1)        25.62%     417.581ms        99.65%        1.624s     203.002ms       0.000us         0.00%     216.695ms      27.087ms             8  
+(Worker_TP0 pid=10542)                                             aten::slice         0.21%       3.483ms         0.32%       5.136ms       1.042us       0.000us         0.00%       0.000us       0.000us          4928  
+(Worker_TP0 pid=10542)                                        aten::as_strided         0.25%       4.094ms         0.25%       4.094ms       0.463us       0.000us         0.00%       0.000us       0.000us          8848  
+(Worker_TP0 pid=10542)                             hipDevicePrimaryCtxGetState         0.00%      47.141us         0.00%      47.141us       0.393us       0.000us         0.00%       0.000us       0.000us           120  
+(Worker_TP0 pid=10542)                                          hipMemcpyAsync         0.21%       3.388ms         0.21%       3.388ms      22.291us       0.000us         0.00%       0.000us       0.000us           152  
+(Worker_TP0 pid=10542)                                        aten::lift_fresh         0.00%       5.060us         0.00%       5.060us       0.211us       0.000us         0.00%       0.000us       0.000us            24  
+(Worker_TP0 pid=10542)                                           aten::flatten         0.02%     266.097us         0.02%     357.910us       0.913us       0.000us         0.00%       0.000us       0.000us           392  
+(Worker_TP0 pid=10542)                                              aten::view         0.37%       6.069ms         0.37%       6.069ms       0.612us       0.000us         0.00%       0.000us       0.000us          9920  
+(Worker_TP0 pid=10542)                                            aten::detach         0.00%      21.960us         0.00%      21.960us       1.372us       0.000us         0.00%       0.000us       0.000us            16  
+(Worker_TP0 pid=10542)                                                aten::to         0.32%       5.144ms        14.26%     232.361ms      24.782us       0.000us         0.00%      30.803ms       3.285us          9376  
+(Worker_TP0 pid=10542)                                      aten::resolve_conj         0.00%       3.680us         0.00%       3.680us       0.230us       0.000us         0.00%       0.000us       0.000us            16  
+(Worker_TP0 pid=10542)                                       aten::resolve_neg         0.00%       1.320us         0.00%       1.320us       0.083us       0.000us         0.00%       0.000us       0.000us            16  
+(Worker_TP0 pid=10542)                                         hipLaunchKernel        35.26%     574.576ms        35.26%     574.599ms      31.201us       0.000us         0.00%       5.759us       0.000us         18416  
+(Worker_TP0 pid=10542)                                           aten::reshape         0.38%       6.266ms         1.94%      31.605ms       3.836us       0.000us         0.00%       2.306ms       0.280us          8240  
+(Worker_TP0 pid=10542)                                          aten::_to_copy         0.64%      10.433ms        13.94%     227.153ms      38.011us       0.000us         0.00%      30.798ms       5.154us          5976  
+(Worker_TP0 pid=10542)                                     aten::empty_strided         1.37%      22.353ms         1.37%      22.361ms       3.025us       0.000us         0.00%       0.000us       0.000us          7392  
+(Worker_TP0 pid=10542)                                            aten::select         0.01%     107.294us         0.01%     143.464us       1.793us       0.000us         0.00%       0.000us       0.000us            80  
+(Worker_TP0 pid=10542)                                                aten::lt         0.00%      41.232us         0.00%      41.232us       5.154us       0.000us         0.00%       0.000us       0.000us             8  
+(Worker_TP0 pid=10542) -------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+(Worker_TP0 pid=10542) Self CPU time total: 1.630s
+(Worker_TP0 pid=10542) Self CUDA time total: 1.372s
+(Worker_TP0 pid=10542) 
+(Worker_TP0 pid=10542) INFO 09-09 15:19:38 [wrapper.py:80] Profiler stopped successfully.
+traces: 2
+68798703478.pt.trace.json.gz p2_gemv=0 p2_reduce=0 incumbent=0
+68798710998.pt.trace.json.gz p2_gemv=0 p2_reduce=0 incumbent=0
+p2_diag.jsonl.10369: 0 rows (0 whitelist) | whitelist (layer_ok,part)=[]
+   M=1 apply calls: 0 (whitelist 0, of which layer_ok 0)
+p2_diag.jsonl.10471: 0 rows (0 whitelist) | whitelist (layer_ok,part)=[]
+   M=1 apply calls: 0 (whitelist 0, of which layer_ok 0)
+p2_diag.jsonl.10542: 0 rows (0 whitelist) | whitelist (layer_ok,part)=[]
+   M=1 apply calls: 0 (whitelist 0, of which layer_ok 0)
+p2_diag.jsonl.10543: 0 rows (0 whitelist) | whitelist (layer_ok,part)=[]
+   M=1 apply calls: 0 (whitelist 0, of which layer_ok 0)
+shapes.csv.10416: 0 rows, M=1 distinct=0, M=1 whitelist={}
+PROBE DONE
+INFO 09-09 15:19:44 [utils.py:615] [shutdown] Process manager: send sigterm to process EngineCore
+(EngineCore pid=10471) INFO 09-09 15:19:44 [core.py:1329] [shutdown] EngineCore: trigger received signal=SIGTERM
+(EngineCore pid=10471) INFO 09-09 15:19:44 [core.py:1465] [shutdown] EngineCore: start mode=abort timeout=0s
+(EngineCore pid=10471) INFO 09-09 15:19:44 [core.py:1496] [shutdown] EngineCore: request processing complete; starting resource teardown
+(EngineCore pid=10471) INFO 09-09 15:19:44 [core.py:1342] [shutdown] EngineCore: exiting busy loop
+(EngineCore pid=10471) INFO 09-09 15:19:44 [multiproc_executor.py:469] [shutdown] Executor: waiting for worker exit count=2
+(Worker_TP0 pid=10542) INFO 09-09 15:19:44 [multiproc_executor.py:833] Parent process exited, terminating worker queues
+(Worker_TP0 pid=10542) INFO 09-09 15:19:44 [wrapper.py:156] Shutting down profiler
+WARNING 09-09 15:19:49 [utils.py:635] [shutdown] Process manager: force killing remaining processes count=1
+WARNING 09-09 15:19:49 [utils.py:640] [shutdown] Process manager: force killing remaining process EngineCore pid 10471
+(EngineCore pid=10471) WARNING 09-09 15:19:49 [multiproc_executor.py:481] [shutdown] Executor: workers still running after grace period; sending SIGTERM count=2
+/usr/lib/python3.12/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 1 leaked shared_memory objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

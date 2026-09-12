@@ -44,6 +44,7 @@ import torch
 from vllm import _custom_ops as ops
 from vllm.model_executor.parameter import BasevLLMParameter, permute_param_layout_
 from vllm.scalar_type import scalar_types
+from vllm.utils.torch_utils import direct_register_custom_op
 
 from .MPLinearKernel import MPLinearLayerConfig
 from .exllama import ExllamaLinearKernel
@@ -117,6 +118,144 @@ def _get_tempdq(nelem: int, dtype, device) -> torch.Tensor:
         buf = torch.empty(nelem, dtype=dtype, device=device)
         _TDQ_POOL[device] = buf
     return buf[:nelem]
+
+
+# ---- P2: gfx906 M=1 GEMV for whitelisted shapes (P1 report v3) ----
+# Shapes are POST-partition (K_dim, N_dim): TP2 sharded widths (same table that
+# has 8704 = 17408/2 and 3072 = 6144/2). A wrong assumption here fails SILENTLY
+# -- zero hits, zero error, zero gain -- so Task 2 asserts them against the
+# engine shape log.
+_P2_SHAPES = frozenset({(5120, 8192), (5120, 7168)})
+# ONE source of truth, on the Python side: the same constant sizes the `part`
+# buffer AND is passed to the kernel, so the two can never disagree (a splitk
+# larger than part's row count = out-of-bounds write the .so cannot detect -- it
+# only sees a raw pointer). 10 is Task 0's measured optimum (60.51 us at 8192 vs
+# 68.56 at the design's 8). Constraint the .hip DOES enforce: splitk must divide
+# K/GROUP = 40 -- 16 does not, which is why the P1/P2 "powers of two" grid missed
+# the optimum entirely.
+_P2_SPLITK = 10
+# GROUP is compiled into the .so. It is also the ONLY layout fact the kernel
+# cannot check: p2_gemv validates K%128 and N%64, then reads [K/128, N] of
+# scales and [K/8, N] of qweight. A per-channel layer (group_size == -1) at a
+# whitelisted shape has ONE scales row, so the warm-up call would read 39 rows
+# past the end -- the .so only sees a raw pointer and cannot tell. Hence
+# _p2_layer_ok below gates on group_size as well as on bits/act_type.
+_P2_GROUP = 128
+_P2_LIB = None
+_P2_OK = False
+try:
+    import ctypes as _ctypes
+    _P2_LIB = _ctypes.CDLL(
+        "/usr/local/lib/python3.12/dist-packages/gfx906/libp2gemv.so")
+    _P2_LIB.p2_gemv.argtypes = ([_ctypes.c_void_p] * 6
+                                + [_ctypes.c_int] * 3 + [_ctypes.c_void_p])
+    _P2_LIB.p2_gemv.restype = _ctypes.c_int
+    # CDLL binds lazily: a successful load does NOT mean the symbol exists.
+    # Without this probe the AttributeError surfaces on the first call --
+    # inside the engine, during capture (P2 review P1).
+    _P2_OK = callable(getattr(_P2_LIB, "p2_gemv", None))
+except (OSError, AttributeError):
+    _P2_OK = False       # default-safe: dispatch falls through to gptq_gemm_out
+# Pure-python hit log: proves P2 actually fired, per shape. Appended INSIDE the
+# op impl, so a hit is a real dispatch at execution time -- not a trace-time
+# branch visit, which is what made G-P3's dispatch invisible from Python.
+# Same pattern as _shape_seen -- list append only, dynamo-safe.
+_P2_HITS: list = []
+
+
+def _p2_layer_ok(c: MPLinearLayerConfig, K_dim: int, N_dim: int) -> bool:
+    """Eligibility for BOTH the split-K scratch and the routing branch.
+
+    Two predicates would be a correctness hazard: allocate-but-not-route wastes
+    memory, route-but-not-allocate crashes on a None buffer, and a group_size
+    mismatch is silently WRONG, not loud. One function, so they cannot drift.
+    """
+    return (_P2_OK
+            and (int(K_dim), int(N_dim)) in _P2_SHAPES
+            and c.weight_type.size_bits == 4
+            and not c.has_g_idx
+            and c.group_size == _P2_GROUP
+            and c.act_type is torch.float16)
+
+
+def _p2_w4a16_gemm_impl(x: torch.Tensor, w_q: torch.Tensor, w_s: torch.Tensor,
+                        w_zp: torch.Tensor, part: torch.Tensor,
+                        out: torch.Tensor) -> torch.Tensor:
+    rc = _P2_LIB.p2_gemv(
+        x.data_ptr(), w_q.data_ptr(), w_s.data_ptr(), w_zp.data_ptr(),
+        part.data_ptr(), out.data_ptr(),
+        int(x.shape[1]), int(out.shape[1]), _P2_SPLITK,
+        torch.cuda.current_stream().cuda_stream)
+    if rc != 0:
+        raise RuntimeError(f"p2_gemv rc={rc}")   # loud beats silently-wrong out
+    return out
+
+
+def _p2_w4a16_gemm_fake(x: torch.Tensor, w_q: torch.Tensor, w_s: torch.Tensor,
+                        w_zp: torch.Tensor, part: torch.Tensor,
+                        out: torch.Tensor) -> torch.Tensor:
+    return torch.empty_like(out)
+
+
+if _P2_OK and not hasattr(torch.ops.vllm, "p2_w4a16_gemm"):
+    direct_register_custom_op(
+        op_name="p2_w4a16_gemm",
+        op_func=_p2_w4a16_gemm_impl,
+        mutates_args=["part", "out"],
+        fake_impl=_p2_w4a16_gemm_fake,
+    )
+
+
+def _p2_gemv_or_fused_impl(x: torch.Tensor, w_q: torch.Tensor,
+                           w_s: torch.Tensor, w_zp: torch.Tensor,
+                           w_g_idx: torch.Tensor, part: torch.Tensor,
+                           out: torch.Tensor, temp_dq: torch.Tensor,
+                           bits: int) -> None:
+    """M-based dispatch that SURVIVES torch.compile.
+
+    This `if` cannot live in apply_weights: that function is inside the
+    dynamo-traced region, so `M == 1` is resolved at TRACE time against the
+    shape the region was first traced with (the prefill M) and the False branch
+    is baked into the artifact -- every captured decode graph then replays the
+    incumbent. Measured in G-P3 run 1: 0 p2_gemv launches compiled vs
+    64/step/rank under enforce_eager. Dynamo does not trace inside a custom op,
+    so here M is the real runtime shape, including during cudagraph capture --
+    which is exactly how vLLM's own M=1 skinny-GEMV dispatch
+    (rocm_unquantized_gemm_impl) stays live in the compiled engine.
+
+    Returns nothing on purpose: `out` is also an input, and an op that returns
+    an aliased input makes dynamo warn ("must not also be an input to this
+    custom operator ... may not alias any inputs", seen once per rank in G-P3
+    run 1) and that is slated to become an error. Declaring `out` mutated is
+    what keeps the write visible -- the same shape as ops.gptq_gemm_out and
+    prefetch_ops' start_prefetch.
+    """
+    if int(x.shape[0]) == 1 and os.environ.get("VLLM_WNA16_P2_GEMV", "1") == "1":
+        # p2_reduce overwrites out[n] for every n, so unlike the fused kernel
+        # (atomicAdd into c) this needs no out.zero_() first.
+        _P2_HITS.append((int(x.shape[1]), int(out.shape[1])))
+        _p2_w4a16_gemm_impl(x, w_q, w_s, w_zp, part, out)
+        return
+    out.zero_()
+    ops.gptq_gemm_out(out, x, w_q, w_zp, w_s, w_g_idx, True, True, bits,
+                      temp_dq)
+
+
+def _p2_gemv_or_fused_fake(x: torch.Tensor, w_q: torch.Tensor,
+                           w_s: torch.Tensor, w_zp: torch.Tensor,
+                           w_g_idx: torch.Tensor, part: torch.Tensor,
+                           out: torch.Tensor, temp_dq: torch.Tensor,
+                           bits: int) -> None:
+    return
+
+
+if _P2_OK and not hasattr(torch.ops.vllm, "p2_gemv_or_fused"):
+    direct_register_custom_op(
+        op_name="p2_gemv_or_fused",
+        op_func=_p2_gemv_or_fused_impl,
+        mutates_args=["part", "out"],
+        fake_impl=_p2_gemv_or_fused_fake,
+    )
 
 
 class WNA16ExllamaKernel(ExllamaLinearKernel):
@@ -236,6 +375,26 @@ class WNA16ExllamaKernel(ExllamaLinearKernel):
         )
         self._tdq_empty = torch.empty(0, dtype=c.act_type, device=device)
 
+        # ---- P2: split-K scratch, only for the whitelisted families ----
+        # Unconditional allocation would hang (splitk, N) fp32 off EVERY WNA16
+        # layer -- ~91 MB/card at the model's N distribution, of which only two
+        # shape families use any of it (P2 review P1). Fixed address, allocated
+        # here in the capture-free zone; the warm-up call below forces the HIP
+        # code object to load OUTSIDE graph capture, so a first-call lazy load
+        # cannot become a capture failure (P2 review missing-2).
+        self._p2_part = None
+        self._p2_route = False
+        if _p2_layer_ok(c, K_dim, N_dim):
+            self._p2_part = torch.empty((_P2_SPLITK, N_dim),
+                                         dtype=torch.float32, device=device)
+            self._p2_route = True
+            # (1, N) not (N,): the op reads out.shape[1] for N.
+            _warm = torch.zeros(1, K_dim, dtype=torch.float16, device=device)
+            _sink = torch.empty(1, N_dim, dtype=torch.float16, device=device)
+            w_q, w_s, w_zp, _w_g_idx = self._get_weight_params(layer)
+            _p2_w4a16_gemm_impl(_warm, w_q, w_s, w_zp, self._p2_part, _sink)
+            torch.cuda.synchronize()
+
     def apply_weights(
         self,
         layer: torch.nn.Module,
@@ -287,7 +446,15 @@ class WNA16ExllamaKernel(ExllamaLinearKernel):
                                   device=x_2d.device)
         else:
             temp_dq = self._tdq_empty
-        if os.environ.get("VLLM_WNA16_EXL_DEBUG") == "legacy":
+        if self._p2_route:
+            # No M here on purpose: a shape test in this function is folded at
+            # trace time (G-P3). The op decides, at runtime, between the P2 GEMV
+            # and the fused incumbent, and writes the result into c_out.
+            torch.ops.vllm.p2_gemv_or_fused(
+                x_2d, w_q, w_s, w_zp, w_g_idx, self._p2_part, c_out, temp_dq,
+                bits)
+            output = c_out
+        elif os.environ.get("VLLM_WNA16_EXL_DEBUG") == "legacy":
             output = ops.gptq_gemm(
                 x_2d, w_q, w_zp, w_s, w_g_idx, True, True, bits)
         else:

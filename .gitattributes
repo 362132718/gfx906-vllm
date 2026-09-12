@@ -1,0 +1,16 @@
+# Scripts and sources are executed inside a Linux container over ssh/scp.
+# Without this, checkout on Windows can inject CRLF and the host sees
+# "bash\r: command not found".
+* text=auto eol=lf
+*.md text eol=lf
+*.py text eol=lf
+*.sh text eol=lf
+*.cu text eol=lf
+*.cuh text eol=lf
+*.cpp text eol=lf
+*.h text eol=lf
+*.yml text eol=lf
+Dockerfile* text eol=lf
+*.tar.gz binary
+*.so binary
+*.log text eol=lf

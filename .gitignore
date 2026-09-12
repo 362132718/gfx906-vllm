@@ -1,15 +1,33 @@
 # Measurement output and hardware dumps are evidence, not source.
 *.log
 blackbox_*.log
-# ...except the curated P0 / P0.5 / P1 evidence files, which the reports cite.
+# ...except the curated P0 / P0.5 / P1 / P2 evidence files, which the reports cite.
 !p0_*.log
 !p05_*.log
 !p1_*.log
+!p2_*.log
 
 # Regenerable / huge build inputs, rebuilt by docker/prepare_build_context.sh.
 build-context/
 dist-packages.tar.gz
 docker/build-context/
+
+# Session / application state, not source. (The .workbuddy directory itself is
+# project data and must not be deleted -- only kept out of version control.)
+.workbuddy/
+
+# Root-level scratch written before 2026-09-01, superseded by docs/superpowers/.
+# Left on disk for reference; excluded so `git status` shows real work only.
+/CRITICAL_FIX_BASED_ON_Z100.md
+/CURRENT_STATUS_SUMMARY.md
+/FINAL_SUMMARY_2026-08-31.md
+/NEXT_STEPS.md
+/QUICK_FIX_GUIDE.md
+/REVISED_FIX_PLAN.md
+/ROOT_CAUSE_ANALYSIS.md
+/STATUS_UPDATE_2026-08-31.md
+/SUCCESS_SUMMARY.md
+/TENSILE_SEGFAULT_FIX.md
 
 __pycache__/
 *.pyc

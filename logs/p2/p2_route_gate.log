@@ -1,0 +1,37 @@
+P2 route gate (G-P2): _P2_OK=True lib=True splitk=10 shapes=[(5120, 7168), (5120, 8192)]
+== row A probe ==
+   probe _P2_OK                       ok   loader found p2_gemv
+   op registered                      ok   torch.ops.vllm.p2_w4a16_gemm
+   part allocated 5120/8192           ok   (10, 8192)
+   part allocated 5120/7168           ok   (10, 7168)
+   part skipped 5120/17408            ok   None
+   part skipped 5120/8704             ok   None
+   part skipped 5120/3072             ok   None
+== row B op==ctypes ==
+   op==ctypes bit-equal 5120/8192     ok   equal=True n_diff=0 max=0 hits=1 last=(5120, 8192)
+   op==ctypes bit-equal 5120/7168     ok   equal=True n_diff=0 max=0 hits=1 last=(5120, 7168)
+== row C M=2 ==
+   M=2 no P2 hit                      ok   hits=0
+   M=2 same as off                    BAD  n_diff=12575 max=11680
+   M=2 == gptq_gemm_out               BAD  n_diff=12340 max=15488
+== row D off-list ==
+   5120/17408 off-list skipped        ok   part=False hits=0
+   5120/17408 unchanged vs off        BAD  n_diff=12405 max=12960
+   5120/8704 off-list skipped         ok   part=False hits=0
+   5120/8704 unchanged vs off         BAD  n_diff=6928 max=6592
+   5120/3072 off-list skipped         ok   part=False hits=0
+   5120/3072 unchanged vs off         BAD  n_diff=2502 max=1280
+== row E kill-switch ==
+   kill-switch: no hits               ok   off=0 default=1 on=2
+   switch changes kernel              ok   n_diff=6385 max=8381 (P2 vs incumbent)
+   switch output finite               ok   
+== row F predicate ==
+   five shapes hit-count exact        ok   want={(5120, 8192): 1, (5120, 7168): 1, (5120, 17408): 0, (5120, 8704): 0, (5120, 3072): 0} got={(5120, 8192): 1, (5120, 7168): 1, (5120, 17408): 0, (5120, 8704): 0, (5120, 3072): 0}
+== row G capture ==
+   capture 5120/8192                  ok   replay_stable=True rewrote_poison=True ==eager=True hits_in_capture=2 aliases_slab=True
+   capture 5120/7168                  ok   replay_stable=True rewrote_poison=True ==eager=True hits_in_capture=2 aliases_slab=True
+
+ROUTE BAD
+G-P2 FAIL
+ROUTE-GATE-DONE
+EXIT=1
