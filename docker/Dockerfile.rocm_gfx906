@@ -115,6 +115,24 @@ COPY patches/triton_decode_attention.py ${SP}/vllm/v1/attention/ops/triton_decod
 # BW_eff. Decode step 53.66 -> 33.01 ms (18.6 -> 30.3 tok/s), greedy-identical.
 COPY patches/layers_utils.py ${SP}/vllm/model_executor/layers/utils.py
 
+# P0.6: gfx906 is not CDNA. `_ON_CDNA` was a plain substring match
+# ("gfx9" in "gfx906"), so Vega20/GCN5 was classified as CDNA and
+# `supports_fp8()` returned True -- even though the comment two lines above
+# that assignment says gfx906 must never inherit CDNA fast paths. Nothing
+# downstream rejects an fp8 KV cache on ROCm either: the SM89 check in
+# v1/attention/backends/triton_attn.py is wrapped in `is_cuda()`, and
+# `_is_supported_kv_cache_dtype()` in v1/attention/ops/
+# triton_reshape_and_cache_flash.py compares a CUDA capability number against
+# the ROCm arch string, where "gfx906" parses as (9, 0) and passes
+# `>= (8, 9)`. Net effect: --kv-cache-dtype fp8_e4m3 was silently accepted on
+# hardware that has no FP8 arithmetic at all, deferring the failure into the
+# kernels. This COPY lands the fix: gfx906 is no longer CDNA, and an fp8 KV
+# cache now fails loudly during config validation, naming the alternatives.
+# Same anti-shadowing rule as the P2 .hip below: this COPY runs after the
+# tarball extract, so the shipped file is always the reviewed copy in
+# patches/ and never whatever the dev container happened to carry.
+COPY patches/platforms_rocm.py ${SP}/vllm/platforms/rocm.py
+
 # gfx906 rocBLAS GEMV workaround (fp32/fp64 matrix*vector segfault).
 # Auto-activates via .pth; NOT sitecustomize.py -- Ubuntu ships its own
 # /usr/lib/python3.12/sitecustomize.py that shadows ours on sys.path.
@@ -198,6 +216,11 @@ ENV HSA_OVERRIDE_GFX_VERSION=9.0.6 \
 # i.e. only as fresh as the last prepare_build_context.sh run; this one is
 # re-COPYed from the repo, so :latest is correct by construction.
 COPY patches/layers_utils.py ${SP}/vllm/model_executor/layers/utils.py
+
+# P0.6 same deal (see the long note in the rebuild stage above): gfx906 must
+# not be classified as CDNA. Re-COPYing here means a Path-A-only rebuild also
+# ships the fix, not just a full Path-B rebuild.
+COPY patches/platforms_rocm.py ${SP}/vllm/platforms/rocm.py
 
 # P2's GEMV .so is not re-COPYed here: Path A inherits it from :rebuilt, which
 # compiled it from patches/p2_w4a16_gemv.hip, and the sanity chain below re-asserts

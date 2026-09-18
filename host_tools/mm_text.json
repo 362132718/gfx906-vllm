@@ -1,0 +1,1 @@
+{"model": "Qwen3.8-27B-OBLITERATED-AWQ-W4A16", "messages": [{"role": "user", "content": "用一句话说明你在正常运行。"}], "max_tokens": 48, "temperature": 0}

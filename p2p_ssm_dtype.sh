@@ -48,10 +48,10 @@ probe() {   # $1 = label, rest = extra args to gfx906-serve
     -p $PORT:$PORT "$IMG" sleep infinity >/dev/null || { say "run FAILED"; return 1; }
   sleep 6
   docker exec -d $CTR bash -lc \
-    "cd /work && PORT=$PORT SERVED_NAME=qwen38 gfx906-serve $MODEL --max-num-seqs 512 $* > /work/$label.log 2>&1"
+    "cd /work && PORT=$PORT SERVED_NAME=qwen38 CAPTURE_SIZES='[1,2,4,8,16]' gfx906-serve $MODEL --max-num-seqs 128 $* > /work/$label.log 2>&1"
 
   local i=0
-  for i in $(seq 1 90); do
+  for i in $(seq 1 60); do
     have_result "$label" && break
     docker ps --format '{{.Names}}' | grep -qx "$CTR" || { say "    container gone at ~$((i*10))s"; break; }
     sleep 10
