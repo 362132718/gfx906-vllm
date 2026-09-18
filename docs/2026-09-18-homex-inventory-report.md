@@ -314,3 +314,63 @@ tar 结构校验：32 条目 / 27 个唯一 blob / manifest 引用 **0 缺失** 
 `5183656` → `origin/p0-attribution`（`1c65ae2..5183656`，67 files，+7964/−18）。
 本提交同时**钉住全部构建输入**（`docker/patches/` 8 个文件）、**修掉重建链的静默缺口**、
 新增恢复手册 `docs/RESTORE.md`。
+
+---
+
+# 附录 B · 残留复查与第三轮清理（2026-09-18 14:10）
+
+清理完成后复查 `/home/x`，用户选择"按建议档删"⇒ 执行第一档 + 第二档，**释放 1766 MiB**。
+
+## B.1 第三轮已删
+
+| 路径 | 体积 | 说明 |
+|---|---|---|
+| `models/vllm/Qwen3-0.6B-real/` + `models/vllm/` | 1.5 G | 附录 A 里有意保留的 vLLM 冒烟模型，本轮按要求删除 |
+| `llamacpp-gfx906-slot-save/build-rocm724-rccl/` | 179 M | 4 个后端脚本**无一引用**，纯遗留 |
+| `.cache/pip/` | 96 M | pip 包缓存 |
+| `.cache/huggingface/` | 44 M | 内含 `models--Qwen--Qwen3.6-27B`（22 M 真 blobs）—— 唯一的 HF 侧残留 |
+| `models/manifests/` | 28 K | ollama manifest 残留 |
+| `images/docker_save.log` | 0 B | 导出 tar 时的空日志 |
+
+## B.2 终态
+
+```
+根分区  142 G → 140 G 已用（可用 729 G）      /home/x  43 G → 42 G
+顶层散落文件  6 个 → 5 个（start/stop-llama-swap.sh、.vllm-api-key、.bash_history、.sudo_as_admin_successful）
+顶层空目录    仅 models/（有意保留：容器 bind-mount 目标，RESTORE.md 依赖它）
+```
+
+## B.3 🚨 复查中查清的两处「看着像残留、其实不能删」
+
+1. **llama.cpp 的 3 个 build 里有 2 个都在用**
+   - `build-rocm724`（206 M）← **3 个**后端引用：27B-Fable-Fus / 27B-V1.1-FF711 / 40B-FF6core
+   - `build-rocm724-fix`（229 M）← **1 个**后端引用：35B-A3B-DSV4Pro
+   - `build-rocm724-rccl`（179 M）← 无人引用 ⇒ 已删
+   - ⚠ 想统一到 `-fix` 需要改 3 个脚本并重新验收，项目已停 ⇒ **不要动**
+2. **`llamacpp-gfx906-slot-save/.git`（354 M）里有未提交的 slot-save 改动**
+   （`tools/server/server.cpp` +3 行、`tools/server/server-context.cpp` 已 staged）
+   ⇒ **删 `.git` 会连带丢掉 diff**。同一组的 `src/llama-context.cpp{.h}.orig`、
+   `tools/server/server.cpp.bak` 是改动备份，**同样保留**。
+
+## B.4 有意未动（与本项目无关）
+
+| 路径 | 体积 | 判据 |
+|---|---|---|
+| `.rustup/` + `.cargo/` | 1.5 G | ⚠ **不是本项目残留** —— 是为 `reinstinct`（Rust 项目）装的 |
+| `reinstinct/` | 3.6 M | Rust 写的 gfx906 推理引擎设计项目（含 `BENCHMARK-FINAL.md`、`gfx906-inference-engine-design.md`、自带 `.git`，2026-08-07） |
+| `.lmstudio/` + `.config/LM-Studio*` | 514 M | LM Studio 客户端 |
+| `下载/` | 263 M | `rocblas-6.4.4` 等旧包（当前栈 7.2.4，已过期） |
+| `snap/` | 188 M | firefox / mesa / gnome / snap-store 等（`snap remove` 比删目录安全） |
+| `.xterminal/` | 236 K | 终端 app stats，含残留 `cpu.tmp` / `fs_stats.tmp` |
+
+⇒ **要回收这 ~2.5 G，判据是"这些工具还用不用"，不是"看着像残留"。**
+`.rustup`/`.cargo` 尤其要看 `reinstinct` 还做不做。
+
+## B.5 三轮清理累计
+
+| 轮次 | 内容 | 释放 |
+|---|---|---|
+| 1 | 40 个测试文件 + 旧镜像 tar（20.55 G） | ~20.6 G |
+| 2 | 13 个工作/归档目录 + 20 个日志 + 3 个旧 Docker 镜像 + 55.5 G 构建缓存 | ~64 G |
+| 3 | 第一档 + 第二档（见 B.1） | 1.7 G |
+| | **合计** | **≈ 85 GiB**（225 G → 140 G） |
