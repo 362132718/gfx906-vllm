@@ -239,4 +239,78 @@ archive_old_work/     → 保持原位（它本身就是归档）
 2. **C 档 17 项，按"保守口径（≈35 G）"还是"含清空构建缓存（≈83 G）"执行？** 我会按批（每批 ≤10 项）逐项列出路径请你确认后再动。
 
 ---
-*报告生成：2026-09-18 ｜ 扫描轮次：4×只读脚本（`host_tools/audit_homex_1..5.sh`）*
+*报告生成：2026-09-18 ｜ 扫描轮次：5×只读脚本（`host_tools/audit_homex_1..5.sh`）*
+
+> **勘误**：§3-B 写"顶层散落 **49** 个文件"，实测为 **45** 个（其中 40 个属 vLLM，5 个保留）。
+> 分组计数：启动/运维 5 + 探针脚本 9 + payload 24 + 补丁 1 + 旧 tar 1 = 40。
+
+---
+
+# 附录 A · 执行结果（2026-09-18 13:0x，已执行）
+
+用户决策：**Docker 内 + 离线 tar｜基座与构建缓存一并删｜直接删（不隔离）｜先推 GitHub 再删**。
+执行方式：`host_tools/wind_down_cleanup.sh`（分批 ≤10，每批校验，遇错即停，含禁区名单）+ `…_2.sh`（sudo 续跑）。
+
+## A.1 终态
+
+| | 前 | 后 |
+|---|---|---|
+| 根分区已用 | **225 G**（tar 导出后峰值 246 G） | **142 G**（可用 727 G） |
+| **净释放** | — | **≈ 83 GiB** |
+| `/home/x` | 58 G | **43 G**（`images/` tar 21 G + `comfyui/` 18 G 占大头） |
+| Docker 镜像 | 4 个 / 110.4 GB | **1 个**：`vllm-gfx906:latest` `2f6d5bf6b47e` / 69.8 GB |
+| Docker 容器 | `vllm`（挂在旧镜像上） | **0** |
+| Build Cache | 55.5 GB | **0** |
+| `/home/x` 顶层散落文件 | 45 | **0** |
+
+## A.2 已删
+
+- 40 个测试文件（5 启动器 + 9 探针 + 24 payload + `patch_rocm_cdna.py`）
+- `vllm-gfx906-c31a8b65.tar`（20.55 G，旧镜像归档，已被新 tar 取代）
+- 目录：`vllm-work` `vllm-cache` `vllm-src` `archive_old_work` `llm-cache` `backup-rocm-tensors`
+  `rccl-gfx906-2.27.7-rocm7.2.4` `model_benchmark` `_rebuild_check` `image-export` `ccache`
+  `logs/kv-tier` `models/vllm-cache` `models/vllm/{Qwen3-0.6B,MiniCPM-o-4.5-awq}`
+- 20 个 vLLM 日志 + 7 个顶层空目录
+- Docker：`vllm-gfx906:pre-cdnafix-20260917`、`vllm-gfx906:rebuilt`、
+  `rocm/dev-ubuntu-24.04:7.2.4-complete`、构建缓存 55.5 G
+
+## A.3 保留
+
+```
+/home/x/images/vllm-gfx906-latest-2f6d5bf6.tar   ← 20.56 GiB，唯一的"根产物"
+/home/x/bin/llama-swap · llama-swap/ · llamacpp-gfx906-slot-save/
+/home/x/start-llama-swap.sh · stop-llama-swap.sh
+/home/x/comfyui/                                 ← 18 G，与本项目无关
+/home/x/models/vllm/Qwen3-0.6B-real/             ← 1.5 G，唯一可加载模型（保留镜像的冒烟用）
+/home/x/logs/（llama.cpp 日志）· .vllm-api-key · dotfiles · /etc/cron.d/amdgpu-*
+```
+
+**有意未动**（与本项目无关，如需清理请单独指示）：
+`.rustup`(1.4 G) `.cargo`(75 M) `snap`(188 M) `.lmstudio`(504 M) `下载`(263 M) `reinstinct` `models/manifests`
+
+## A.4 ⚠ 执行中发现的权限坑
+
+首次运行（无 sudo）在批次 7 大面积 `权限不够`：`vllm-work/vllm-official/.deps/`、
+`archive_old_work/vllm028_triton_cache/`、`llm-cache/vllm/modelinfos/` 中的文件**属主是 root**
+（当年由容器内 root 进程写入）。
+
+⇒ **`/home/x` 下凡是容器写过的目录，普通用户删不掉；收摊清理必须用 `sudo`。**
+本机 `sudo -n` 免密可用，故第二次续跑即完成。
+
+## A.5 保留镜像的最终自检（未占卡、未加载模型）
+
+```
+rocm.py md5 : 221a70134a8d22f9d411cc0f7871dc10
+cdna-fix    : 1          fp8-guard : 1
+gfx906-serve: /usr/local/bin/gfx906-serve
+/opt/gfx906 : QUICKSTART.md  selfcheck.sh  serve.sh
+vllm/torch  : 0.28.0  2.13.0+rocm7.2
+```
+
+tar 结构校验：32 条目 / 27 个唯一 blob / manifest 引用 **0 缺失** / **0 零字节 blob**。
+
+## A.6 GitHub
+
+`5183656` → `origin/p0-attribution`（`1c65ae2..5183656`，67 files，+7964/−18）。
+本提交同时**钉住全部构建输入**（`docker/patches/` 8 个文件）、**修掉重建链的静默缺口**、
+新增恢复手册 `docs/RESTORE.md`。
